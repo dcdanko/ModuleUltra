@@ -57,10 +57,10 @@ class PipelineInstance:
         for resultSchema in self.resultSchema:
             preprocessed += resultSchema.preprocessSnakemake()
             preprocessed += '\n'
-        tfile = self.muRepo.makeTempFile()
-        with open(tfile, 'w') as tf:
-            tf.write(preprocessed)
-        return tf
+        sfile = self.muRepo.snakemakeFilepath(self.pipelineName)
+        with open(tfile, 'w') as sf:
+            sf.write(preprocessed)
+        return sfile
         
 
     def listEndpoints(self):
