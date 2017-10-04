@@ -1,8 +1,8 @@
-DataSuper
+ModuleUltra
 =========
 
-.. image:: https://img.shields.io/pypi/v/DataSuper.svg
-    :target: https://pypi.python.org/pypi/DataSuper
+.. image:: https://img.shields.io/pypi/v/ModuleUltra.svg
+    :target: https://pypi.python.org/pypi/ModuleUltra
     :alt: Latest PyPI version
 
 Easy to use pipelines for large biological datasets.
@@ -10,29 +10,28 @@ Easy to use pipelines for large biological datasets.
 Goals
 -----
 
-Bioinformatics pipelines often involve a large number of files with complex organization and metadata. Often researchers keep these files organized with carefully patterned filenames, elaborate directory structures and spreadsheets containing metadata. 
+Bioinformatics pipelines often involve a large number of files with complex organization and metadata, complex paths, and lots of dependencies. ModuleUltra is intended to make it easier run and distribute complex pipelines. It is built on top of DataSuper and SnakeMake. ModuleUltra defines both an API and CLI. 
 
-DataSuper builds on this approach. DataSuper provides a system to track files that groups files into related modules (i.e. the two fastq files usually used to represent forward and reverse reads), groups sets of modules with samples that store metadata, and groups sets of samples into projects. All of this information is stored in a simple yet customizable database with an API for programmatic access.
+ModuleUltra is probably overkill for small projects, it has been designed in particular for the MetaSUB project which has thousands of samples and complex analysis pipelines. ModuleUltra makes it easier to do consistent analysis on thousands of samples across many sites.
 
-DataSuper is probably overkill for small projects, it has been designed in particular for the MetaSUB project which has thousands of samples and complex analysis pipelines. DataSuper makes it easier to keep track of the huge number of files associated with the analysis of these samples, in particular it helps as a bottom layer that can be accessed by higher level applications. 
-
-MetaSUB is also developing a program called ModuleUltra which builds off DataSuper and SnakeMake to provide easily distributable versioned pipelines.
+MetaSUB is also developing a program called DataSuper which tracks complex data and metadata.
 
 In summary:
- - DataSuper works without disrupting existing bioinformatic workflows
- - DataSuper tightly packages data with metadata
- - DataSuper groups files in the same project
- - DataSuper packages data that is stored across multiple files
- - DataSuper allows programmatic access and ad-hoc grouping of files
+ - ModuleUltra makes it easy to install complex pipelines
+ - ModuleUltra makes it easy to run pipelines only on slected subsets of the data
+ - ModuleUltra makes it easy to run parts of large complex pipelines
+ - ModuleUltra automatically tracks output of pipelines in DataSuper
+ - ModuleUltra allows you to write most of your pipelines logic in SnakeMake, a popular pipeline system
+ - ModuleUltra reduces the amount of boilerplate code necessary to make a pipeline
 
-Eventually DataSuper will support peer-to-peer sharing so that data can be more easily shared across academic sites.
+ModuleUltra is intended to improve reproducibility, features are being added to improve file provenance.
 
 Installation
 ------------
 
-Be aware that DataSuper is still an Alpha. There are likely many bugs, fotunately there is no risk that DataSuper will delete your files since it only exists as a layer on top of your systems filesystem.
+Be aware that ModuleUltra is still an Alpha. There are still bugs and some unimplemented features.
 
-DataSuper is currently being used on Ubuntu and RHEL systems. It should work on any *nix system.
+ModuleUltra is currently being used on Ubuntu and RHEL systems. It should work on any *nix system.
 
 To install:
 
@@ -51,4 +50,4 @@ MIT License
 Authors
 -------
 
-`DataSuper` was written by `David C. Danko <dcdanko@gmail.com>`_.
+`ModuleUltra` was written by `David C. Danko <dcdanko@gmail.com>`_.
