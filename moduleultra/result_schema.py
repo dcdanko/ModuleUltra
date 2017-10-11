@@ -2,18 +2,21 @@ from .utils import getOrDefault
 
 class ResultSchema:
 
-    def __init__(self,  muRepo, pipelineName, schema):
+    def __init__(self,  muRepo, pipeName, pipeVersion, schema):
         self.muRepo = muRepo
         self.muConfig = self.muRepo.muConfig
-        self.pipelineName = pipelineName
+        self.pipelineName = pipeName
+        self.pipelineVersion = pipeVersion
         
         self.name = schema['NAME']
         self.dependencies = getOrDefault( schema, 'DEPENDENCIES', [])
         self.module = getOrDefault( schema, 'MODULE', self.name)
         self.level = getOrDefault( schema, 'LEVEL', 'RESULT')
 
-        self.snakeFile = self.muConfig.getSnakeFile(self.pipelineName,
-                                                    schema['SNAKEMAKE_FILE'])
+        self.snakeFilename = '{}.snkmk'.format(self.module)
+        self.snakeFilepath = self.muConfig.getSnakefile(self.pipelineName,
+                                                        self.pipelineVersion,
+                                                        self.snakeFilename)
         self.files = {}
         files = schema['FILES']
         if type(files) == []:
@@ -21,7 +24,7 @@ class ResultSchema:
         else:
             self.files = files    
 
-
+            
     def makeRegisterRule(self):
         '''
         every result in ModuleUltra gets checked into data

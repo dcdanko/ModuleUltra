@@ -16,6 +16,7 @@ setuptools.setup(
 
     install_requires=[
         'click==6.7',
+        'snakemake==4.1.0'
     ],
 
     entry_points={
@@ -28,7 +29,6 @@ setuptools.setup(
         'Development Status :: 2 - Pre-Alpha',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
 )

@@ -3,6 +3,8 @@ import os.path
 import os
 from json import loads as jloads
 from .errors import *
+from .installation import *
+from .utils import getOrDefault
 
 class ModuleUltraConfig:
     '''
@@ -39,9 +41,10 @@ class ModuleUltraConfig:
         if version is None:
             version = getHighestVersion( self.installedPipes[pipelineName])
             
-        pipeName = joinPipelineNameAndVersion(pipelineName, version)
+        pipeName = joinPipelineNameVersion(pipelineName, version)
         pipeDef = os.path.join( self.getInstalledPipelinesDir(), pipeName)
         pipeDef = os.path.join(pipeDef, 'pipeline_definition.json')
+        pipeDef = open(pipeDef).read()        
         pipeDef = jloads(pipeDef)
         return pipeDef
 
@@ -58,7 +61,35 @@ class ModuleUltraConfig:
     def installPipeline(self, uri):
         installer = PipelineInstaller(self, uri)
         installer.install()
+
+    def getSnakefile(self, pipeName, version, fileName):
+        vPipeName = joinPipelineNameVersion(pipeName, version)
+        pipeDir = os.path.join( self.getInstalledPipelinesDir(), vPipeName)
+        pipeDef = os.path.join(pipeDir, 'pipeline_definition.json')
+        pipeDef = jloads( open(pipeDef).read())
+        try:
+            snakeDir = pipeDef["SNAKEMAKE"]["DIR"]
+            snakeDir = os.path.join(pipeDir, snakeDir)
+        except KeyError:
+            snakeDir = pipeDir
+        snakeFile = os.path.join(snakeDir, fileName)
+        return snakeFile
+
+    def getSnakemakeConf(self, pipeName, version):
+        vPipeName = joinPipelineNameVersion(pipeName, version)
+        pipeDir = os.path.join( self.getInstalledPipelinesDir(), vPipeName)
+        pipeDef = os.path.join(pipeDir, 'pipeline_definition.json')
+        pipeDef = jloads( open(pipeDef).read())
+        try:
+            snakeConf = pipeDef["SNAKEMAKE"]["CONF"]
+            snakeConf = os.path.join(pipeDir, snakeConf)
+        except KeyError:
+            snakeConf = os.path.join(pipeDir, 'snakemake_config.json')
+        return snakeConf
     
+
+
+        
     @classmethod
     def getConfigDir(ctype):
         '''

@@ -3,6 +3,8 @@ from .utils import *
 from .errors import *
 import os.path
 import datasuper as ds
+from .module_ultra_config import ModuleUltraConfig
+from .pipeline_instance import PipelineInstance
 
 class ModuleUltraRepo:
     '''
@@ -17,14 +19,14 @@ class ModuleUltraRepo:
         self.abspath = abspath
         self.muConfig = ModuleUltraConfig.load()
 
-        pipePath = os.path.join(self.abspath, pipeRoot)
-        self.pipelines = PersistentSet(pipePath)
+        pipePath = os.path.join(self.abspath, ModuleUltraRepo.pipeRoot)
+        self.pipelines = PersistentDict(pipePath)
 
 
     def datasuperRepo(self):
         return ds.Repo.loadRepo()
         
-    def addPipeline(self, pipelineName, version=None):
+    def addPipeline(self, pipelineName, version=None, modify=False):
         '''
         Add a pipeline that has already been installed
         to this repo.
@@ -32,26 +34,36 @@ class ModuleUltraRepo:
         Add relevant types to the datasuper repo.
         Add the pipeline to the list of pipelines in the repo.
         '''
+        if not modify:
+            if pipelineName in self.pipelines:
+                raise PipelineAlreadyInRepoError()
+            
         pipelineDef = self.muConfig.getPipelineDefinition(pipelineName,
                                                           version=version)
-        instance = PipelineInstance(self, pipelineDef)
+        if version is None:
+            version = pipelineDef["VERSION"]
+            
+        instance = PipelineInstance(self, pipelineName, version, pipelineDef)
         with ds.Repo.loadRepo() as dsRepo:
             for fileTypeName in instance.listFileTypes():
                 dsRepo.addFileType( fileTypeName)
 
-            for schemaName, schemaFields in instance.listResultSchema():
-                dsRepo.addResultSchema(schemaName, schemaFields)
+            for schema in instance.listResultSchema():
+                dsRepo.addResultSchema(schema.name, schema.files)
 
             for sampleTypeName in instance.listSampleTypes():
                 dsRepo.addSampleType( sampleTypeName)
 
-        self.pipelines.add( joinPipelineNameVersion(pipelineName, version))
-
+#        self.pipelines.add( joinPipelineNameVersion(pipelineName, version))
+        self.pipelines[pipelineName] = version
+        
     def getPipelineInstance(self, pipelineName, version=None):
-        assert joinPipelineNameVersion(pipelineName,version) in self.pipelines
+        assert pipelineName in self.pipelines
+        if version is not None:
+            assert version == self.pipelines[pipelineName]
         pipelineDef = self.muConfig.getPipelineDefinition(pipelineName,
                                                           version=version)
-        return PipelineInstance(self, pipelineDef)
+        return PipelineInstance(self, pipelineName, version)
 
     def listPipelines(self):
         '''

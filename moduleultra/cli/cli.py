@@ -26,10 +26,14 @@ def add():
 
 @add.command(name='pipeline')
 @click.option('-v' ,'--version', default=None, type=str)
+@click.option('--modify/--no-modify', default=False)
 @click.argument('name', nargs=1)
-def addPipeline( version, name):
+def addPipeline( version, modify, name):
     repo = ModuleUltraRepo.loadRepo()
-    repo.addPipeline(name, version=version)
+    try:
+        repo.addPipeline(name, version=version, modify=modify)
+    except errors.PipelineAlreadyInRepoError:
+        print('{} is already in this repo.'.format(name), file=sys.stderr)
 
 ################################################################################
 
@@ -92,11 +96,12 @@ def view():
 def viewPipelines(globally):
     if globally:
         muConfig = ModuleUltraConfig.load()
-        for pName, versions in muConfig.listInstalledPipelines():
-            print(pName)
+        for pName, versions in muConfig.listInstalledPipelines().items():
+            vs = ' '.join(versions)
+            print('{} :: {}'.format(pName,vs))
     else:
         repo = ModuleUltraRepo.loadRepo()
-        for pName in repo.listPipelines(repo):
+        for pName in repo.listPipelines():
             print(pName)
 
 ################################################################################

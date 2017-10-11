@@ -11,3 +11,7 @@ class NoModuleUltraFoundError( Exception):
 
 class PipelineAlreadyInstalledException( Exception):
     pass
+
+
+class PipelineAlreadyInRepoError( Exception):
+    pass

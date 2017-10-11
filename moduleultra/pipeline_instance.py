@@ -1,5 +1,7 @@
 from snakemake import snakemake
-
+from .utils import *
+from datasuper.utils import parsers as dsparsers
+from .result_schema import ResultSchema
 
 class PipelineInstance:
     '''
@@ -12,21 +14,27 @@ class PipelineInstance:
     snakemake
     '''
     
-    def __init__(self, muRepo, pipelineName, pipelineDef):
+    def __init__(self, muRepo, pipeName, pipeVersion, pipelineDef):
         self.muRepo = muRepo
         self.muConfig = self.muRepo.muConfig
-        self.pipelineName = pipelineName
+        self.pipelineName = pipeName
+        self.pipelineVersion = pipeVersion
         
-        self.fileTypes = util.parseFileTypes(pipelineDef['FILE_TYPES'])
+        self.fileTypes = dsparsers.parseFileTypes(pipelineDef['FILE_TYPES'])
         self.sampleTypes = pipelineDef['SAMPLE_TYPES']
         self.resultSchema = []
         for schema in pipelineDef['RESULT_TYPES']:
-            self.resultSchema.append( ResultSchema(muRepo, pipelineName, schema) )
+            self.resultSchema.append( ResultSchema(muRepo,
+                                                   self.pipelineName,
+                                                   self.pipelineVersion,
+                                                   schema) )
         
         self.origins = pipelineDef['ORIGINS']
-        self.endpoints = util.parseEndpoints(pipelineDef)
+        allEnds = [schema.name for schema in self.resultSchema if schema.name not in self.origins]
+        self.endpoints = getOrDefault( pipelineDef, 'END_POINTS', allEnds)
 
-        self.snakemakeConf = self.muConfig.findSnakemakeConf(pipelineName, pipelineDef)
+        self.snakemakeConf = self.muConfig.getSnakemakeConf(self.pipelineName,
+                                                             self.pipelineVersion)
 
     def run(self,
             endpts=None, groups=None, samples=None, results=None,
@@ -61,11 +69,20 @@ class PipelineInstance:
         with open(tfile, 'w') as sf:
             sf.write(preprocessed)
         return sfile
-        
+
+    def listFileTypes(self):
+        return [el for el in self.fileTypes]
 
     def listEndpoints(self):
         return self.endpoints
 
+    def listResultSchema(self):
+        return [schema for schema in self.resultSchema]
+
+    def listSampleTypes(self):
+        return [el for el in self.sampleTypes]
+
+    
     def addEndpointsAndDataToSnakemakeConf(self, endpts, groups, samples, results):
         resultDir = self.muRepo.getResultDir()
         pass
