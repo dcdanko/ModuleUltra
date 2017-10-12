@@ -61,15 +61,18 @@ class ModuleUltraRepo:
         assert pipelineName in self.pipelines
         if version is not None:
             assert version == self.pipelines[pipelineName]
+        else:
+            version = self.pipelines[pipelineName]
+            
         pipelineDef = self.muConfig.getPipelineDefinition(pipelineName,
                                                           version=version)
-        return PipelineInstance(self, pipelineName, version)
+        return PipelineInstance(self, pipelineName, version, pipelineDef)
 
     def listPipelines(self):
         '''
         List the names of pipelines that have been added to this repo
         '''
-        return [p for p in self.pipelines]
+        return [p for p in self.pipelines.keys()]
 
     def snakemakeFilepath(self, pipelineName):
         '''
