@@ -1,6 +1,9 @@
 from .utils import getOrDefault
 import datasuper as ds
 from .snakemake_rule_builder import SnakemakeRuleBuilder
+from .snakemake_utils import *
+from .utils import *
+
 class ResultSchema:
 
     def __init__(self,  muRepo, pipeName, pipeVersion, schema, origin=False):
@@ -13,7 +16,7 @@ class ResultSchema:
         self.name = schema['NAME'] # this is the name of the result type in datasuper as well
         self.dependencies = getOrDefault( schema, 'DEPENDENCIES', [])
         self.module = getOrDefault( schema, 'MODULE', self.name)
-        self.level = getOrDefault( schema, 'LEVEL', 'RESULT')
+        self.level = getOrDefault( schema, 'LEVEL', 'SAMPLE')
 
         self.snakeFilename = '{}.snkmk'.format(self.module)
         self.snakeFilepath = self.muConfig.getSnakefile(self.pipelineName,
@@ -43,7 +46,7 @@ class ResultSchema:
         is probably the same as the datasuper sample_name. This is 
         hacky but this whole approach is hacky.
         '''
-        if self.level == 'RESULT':
+        if self.level == 'SAMPLE':
             ruleBldr = SnakemakeRuleBuilder('register_{}'.format(self.module))
 
             dsRepo = ds.Repo.loadRepo()
@@ -52,9 +55,11 @@ class ResultSchema:
                 fpattern = self._makeFilePattern( fname, ext)
                 ruleBldr.addInput(fname, fpattern)
             
-            ruleBldr.setOutput( self._makeFilePattern('flag', 'registered'))            
+            ruleBldr.setOutput( self.getOutputFilePattern())            
 
-            ruleBldr.addParam('dsResultName', self.module)
+            resName = joinResultNameType('{sample_name}', self.name)
+            ruleBldr.addParam('dsResultName', resName)
+            ruleBldr.addParam('sampleName', '{sample_name}')
             ruleBldr.addParam('dsResultType', self.name)
             for fname, ftype in self.files.items():
                 ruleBldr.addParam( fname, ftype)
@@ -74,6 +79,15 @@ class ResultSchema:
                                           result_type=params.dsResultType,
                                           file_records=fileRecs)
                 result.save()
+                try:
+                    sampleName = params.sampleName
+                except KeyError:
+                    sampleName = None
+                if sampleName and (sampleName.lower() != 'none'):
+                    sample = dsrepo.db.sampleTable.get(sampleName)
+                    sample.addResult(result)
+                    sample.save()
+                
                 shell('touch '+output)
 
             '''
@@ -89,6 +103,8 @@ class ResultSchema:
         Adds a register rule
         '''
         snakefileStr = open(self.snakeFilepath).read()
+        if self.isOrigin():
+            snakefileStr = self.editOrigins( snakefileStr)
         snakefileStr += self.makeRegisterRule()
         return snakefileStr
 
@@ -96,17 +112,26 @@ class ResultSchema:
         return self.origin
 
     def _makeFilePattern(self, fname, ext):
-        if self.level  == 'RESULT':
-            fpattern = '{{result_name}}.{}.{}.{}'.format(self.module, fname, ext)
+        if self.level  == 'SAMPLE':
+            fpattern = '{{sample_name}}.{}.{}.{}'.format(self.module, fname, ext)
             return fpattern
+
+    def editOrigins( self, snakefileStr):
+        return snakefileStr
         
     def preprocessConf(self, conf):
         dsRepo = ds.Repo.loadRepo()
         for fname, ftype in self.files.items():
             ext = dsRepo.getFileTypeExt(ftype)
-            fpattern = self._makeFilePattern( fname, ext)
+            if self.isOrigin():
+                fpattern = "$$$ getOriginResultFiles( \"{}\", \"{}\") $$$".format(self.module, fname)
+            else:
+                fpattern = self._makeFilePattern( fname, ext)
             try:
                 conf[self.module][fname] = fpattern
             except KeyError:
                 conf[self.module] = {fname: fpattern}
         return conf
+
+    def getOutputFilePattern(self):
+        return self._makeFilePattern('flag', 'registered')

@@ -5,6 +5,9 @@ from .result_schema import ResultSchema
 import subprocess as sp
 import json
 import sys
+import datasuper as ds
+from .snakemake_rule_builder import SnakemakeRuleBuilder
+
 
 class PipelineInstance:
     '''
@@ -46,11 +49,26 @@ class PipelineInstance:
                                                              self.pipelineVersion)
 
     def run(self,
-            endpts=None, groups=None, samples=None, results=None,
+            endpts=None, groups=None, samples=None,
             dryrun=False, unlock=False, jobs=1, local=False):
-        
-        preprocessedConf = self.preprocessConf(endpts, groups, samples, results)
-        snakefile = self.preprocessSnakemake(preprocessedConf)
+
+        dsRepo = ds.Repo.loadRepo()
+        if not groups:
+            groups = dsRepo.db.sampleGroupTable.getAll()
+        else:
+            groups = dsRepo.db.sampleGroupTable.getMany(groups)
+        if not samples:
+            samples = dsRepo.db.sampleTable.getAll()
+        else:
+            samples = dsRepo.db.sampleTable.getMany(samples)
+        if not endpts:
+            endpts = [schema for schema in self.resultSchema if schema.name in self.endpoints]
+        else:
+            endpts = [schema for schema in self.resultSchema if schema.name in endpts]
+
+            
+        preprocessedConf = self.preprocessConf(self.origins, samples, groups)
+        snakefile = self.preprocessSnakemake( preprocessedConf, endpts, samples, groups)
         clusterScript = None
         if not local:
             clusterScript = self.muRepo.muConfig.clusterSubmitScript()
@@ -65,27 +83,20 @@ class PipelineInstance:
                    force_incomplete=True,
                    nodes=jobs)
 
-    def preprocessConf(self, endpts, groups, samples, results):
-        pconf = json.loads(open(self.snakemakeConf).read())
-        pconf = runBackticks( pconf)
-        for resultSchema in self.resultSchema:
-            resultSchema.preprocessConf(pconf)
-        confWithData = self.addEndpointsToSnakemakeConf(pconf, endpts)
-        confWithData = self.addDataToSnakemakeConf(pconf, groups, samples, results)        
-        return confWithData
 
-        
-    def preprocessSnakemake(self, conf):
+    def preprocessSnakemake(self, confStr, endpts, samples, groups):
         preprocessed = ''
 
         # add imports
         preprocessed += 'import os.path\n'
         preprocessed += 'import datasuper as ds\n'
+        preprocessed += 'from moduleultra.snakemake_utils import *\n'
         
         # add conf
-        preprocessed += '\nconfig={}\n\n'.format(json.dumps(conf, indent=4))
+        preprocessed += '\nconfig={}\n\n'.format(confStr)
         
         # add all rule
+        preprocessed += self.makeSnakemakeAllRule( endpts, samples, groups)
 
         # add individual results
         for resultSchema in self.resultSchema:
@@ -101,6 +112,85 @@ class PipelineInstance:
             
         return sfile
 
+    def makeSnakemakeAllRule(self, endpts, samples, groups):
+        ruleBldr = SnakemakeRuleBuilder('all')
+        for schema in endpts:
+            pattern = schema.getOutputFilePattern()
+            if schema.level == 'SAMPLE':
+                for sample in samples:
+                    inp = pattern.format(sample_name=sample.name)
+                    ruleBldr.addInput(inp)
+            elif schema.level == 'GROUP':
+                for group in groups:
+                    inp = pattern.format(group_name=group.name)
+                    ruleBldr.addInput(inp)
+            else:
+                print(schema.level, file=sys.stderr)
+                assert False
+        return str(ruleBldr)
+
+    def preprocessConf(self, origins, samples, groups):
+        pconf = json.loads(open(self.snakemakeConf).read())
+        pconf = runBackticks( pconf)
+        for resultSchema in self.resultSchema:
+            resultSchema.preprocessConf(pconf)
+
+        pconf = self.addDataToSnakemakeConf(pconf, samples, groups)
+        pconf = self.addOriginsToSnakemakeConf(pconf, origins, samples, groups)
+
+        
+        confStr = json.dumps(pconf, indent=4)
+        '''
+        # this is a bad hack that should probably be forgotten
+        confLines = confStr.split('\n')
+        newConfLines = []
+        for confLine in confLines:
+            tkns = confLine.split(' ')
+            newTkns = []
+            for i, tkn in enumerate(tkns):
+                if '$' in tkn:
+                    newTkn = ''            
+                    for c in tkn:
+                        if c not in ['"', '$']:
+                            newTkn += c
+                else:
+                    newTkn = tkn
+
+                newTkns.append( newTkn)
+            newConfLines.append( ' '.join(newTkns))
+        
+        confStr = '\n'.join(newConfLines)
+        print( confStr)            
+        '''
+        return confStr
+
+
+    def addDataToSnakemakeConf(self, conf, samples, groups):
+        sampleConf = {}
+        for sample in samples:
+            sampleConf[sample.name] = {'sample_type': sample.sampleType}
+        conf['samples'] = sampleConf
+        return conf
+
+
+    def addOriginsToSnakemakeConf(self, conf, origins, samples, groups):
+        originConf = { origin : {} for origin in origins}
+
+        for sample in samples:
+            for result in sample.results(resultTypes=origins):
+                recs = {}
+                for fileRecName, fileRec in result.files():
+                    recs[fileRecName] = fileRec.filepath()
+                originConf[result.resultType()][sample.name] = recs
+        for group in groups:
+            for result in group.getResults(resultTypes=origins):
+                recs = {}
+                for fileRecName, fileRec in result.files():
+                    recs[fileRecName] = fileRec.filePath()
+                originConf[result.resultType][group.name] = recs
+        conf['origins'] = originConf
+        return conf
+
     def listFileTypes(self):
         return [el for el in self.fileTypes]
 
@@ -114,14 +204,8 @@ class PipelineInstance:
         return [el for el in self.sampleTypes]
 
     
-    def addEndpointsToSnakemakeConf(self, conf, endpts):
-        resultDir = self.muRepo.getResultDir()
-        return conf
 
-    def addDataToSnakemakeConf(self, conf, groups, samples, results):
-        resultDir = self.muRepo.getResultDir()
-        return conf
-
+    
     
 
 def runBackticks(obj):

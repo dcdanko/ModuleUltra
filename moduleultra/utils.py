@@ -9,6 +9,11 @@ def joinPipelineNameVersion( pipeName, version):
     delim = '::'
     return '{}{}{}'.format(pipeName, delim, version)
 
+def joinResultNameType( resultName, rType):
+    delim = '::'
+    return '{}{}{}'.format( resultName, delim, rType)
+
+
 def splitPipelineNameVersion( versionedPipeName):
     delim = '::'
     return versionedPipeName.split(delim)
