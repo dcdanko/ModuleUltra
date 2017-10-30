@@ -1,6 +1,7 @@
 import shutil
 from subprocess import call
-import os .path
+import os.path
+from os import symlink
 from json import loads as jloads
 from moduleultra.utils import *
 
@@ -11,10 +12,10 @@ class PipelineInstaller:
 
     stagingDir = 'staging'
 
-    def __init__(self, muConfig, uri):
+    def __init__(self, muConfig, uri, dev=False):
         self.uri = uri
         self.muConfig = muConfig
-
+        self.dev = dev
 
     def install(self):
         staged = self.stagePipeline()
@@ -36,10 +37,20 @@ class PipelineInstaller:
     def stageFromLocal(self):
         dest = self.muConfig.getInstalledPipelinesDir()
         dest = os.path.join( dest, PipelineInstaller.stagingDir)
-        copytree(self.uri, dest)
+        uri = self.uri
+        if uri[-1] == '/':
+            uri = uri[:-1]
+        hname = uri.split('/')[-1].split('.')[0]
+        dest = os.path.join( dest, hname)
+        if self.dev:
+            symlink( self.uri, dest)
+        else:
+            shutil.copytree(self.uri, dest)
         return os.path.join(dest)
 
     def stageFromGithub(self):
+        if self.dev:
+            assert False and 'Dev mode can only be applied to local pipelines'
         dest = self.muConfig.getInstalledPipelinesDir()
         dest = os.path.join( dest, PipelineInstaller.stagingDir)
         hname = self.uri.split('/')[-1].split('.')[0]
@@ -56,7 +67,8 @@ class PipelineInstaller:
         return pipeDef
         
     def loadPipelineFilesIntoConfig(self, staged, pipeDef):
-        pipeDir = joinPipelineNameVersion(pipeDef['NAME'], pipeDef['VERSION'])
+        version = pipeDef['VERSION']
+        pipeDir = joinPipelineNameVersion(pipeDef['NAME'], version)
         dest = self.muConfig.getInstalledPipelinesDir()
         dest = os.path.join( dest, pipeDir)
         shutil.move(staged, dest)

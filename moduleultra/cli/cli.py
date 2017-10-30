@@ -38,10 +38,28 @@ def addPipeline( version, modify, name):
 ################################################################################
 
 @main.command(name='install')
+@click.option('--dev/--normal', default=False)
 @click.argument('uri', nargs=1)
-def installPipeline(uri):
+def installPipeline(uri, dev=False):
     muConfig = ModuleUltraConfig.load()
-    muConfig.installPipeline(uri)
+    muConfig.installPipeline(uri, dev=dev)
+
+@main.command(name='uninstall')
+@click.option('-v' ,'--version', default=None, type=str)
+@click.argument('name', nargs=1)
+def uninstallPipeline(name, version=None):
+    muConfig = ModuleUltraConfig.load()
+    muConfig.uninstallPipeline(name, version=version)
+
+@main.command(name='reinstall')
+@click.option('-v' ,'--version', default=None, type=str)
+@click.option('--dev/--normal', default=False)
+@click.argument('name', nargs=1)
+@click.argument('uri', nargs=1)
+def reinstallPipeline(name, uri, version=None, dev=False):
+    muConfig = ModuleUltraConfig.load()
+    muConfig.uninstallPipeline(name, version=version)
+    muConfig.installPipeline(uri, dev=dev)
 
 ################################################################################
 

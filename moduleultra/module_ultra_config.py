@@ -5,6 +5,7 @@ from json import loads as jloads
 from .errors import *
 from .installation import *
 from .utils import getOrDefault
+from shutil import rmtree
 
 class ModuleUltraConfig:
     '''
@@ -58,10 +59,20 @@ class ModuleUltraConfig:
     def getInstalledPipelinesDir(self):
         return os.path.join(self.abspath, ModuleUltraConfig.pipelineDirName)
 
-    def installPipeline(self, uri):
-        installer = PipelineInstaller(self, uri)
+    def installPipeline(self, uri, dev=False):
+        installer = PipelineInstaller(self, uri, dev=dev)
         installer.install()
 
+
+    def uninstallPipeline(self, pipeName, version=None):
+        if version is None:
+            version = getHighestVersion( self.installedPipes[pipeName])
+ 
+        vPipeName = joinPipelineNameVersion(pipeName, version)
+        pipeDir = os.path.join( self.getInstalledPipelinesDir(), vPipeName)
+        rmtree(pipeDir)
+        del self.installedPipes[pipeName]
+        
     def getSnakefile(self, pipeName, version, fileName):
         vPipeName = joinPipelineNameVersion(pipeName, version)
         pipeDir = os.path.join( self.getInstalledPipelinesDir(), vPipeName)
