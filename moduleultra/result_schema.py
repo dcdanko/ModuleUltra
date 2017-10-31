@@ -71,24 +71,34 @@ class ResultSchema:
                     name = os.path.basename(fpath)
                     fileType = params[fname]
                     fileRec = ds.FileRecord( dsrepo, name=name, filepath=fpath, file_type=fileType)
-                    fileRec.save()
-                    fileRecs[fname] = fileRec
+                    print( '[DataSuper] Saving File: {}'.format(fileRec), file=sys.stderr)
+                    try:
+                        fileRec.save()
+                    except ds.database.RecordExistsError as ree:
+                        print( '[DataSuper] Record already exists: {}'.format(ree), file=sys.stderr)
+                    fileRecs[fname] = name
 
                 result = ds.ResultRecord( dsrepo,
                                           name=params.dsResultName,
                                           result_type=params.dsResultType,
                                           file_records=fileRecs)
-                result.save()
+                print( '[DataSuper] Saving Result: {}'.format(result), file=sys.stderr)
+                try:
+                    result.save()
+                except ds.database.RecordExistsError as ree:
+                    print( '[DataSuper] Record already exists: {}'.format(ree), file=sys.stderr)
+
                 try:
                     sampleName = params.sampleName
                 except KeyError:
                     sampleName = None
                 if sampleName and (sampleName.lower() != 'none'):
                     sample = dsrepo.db.sampleTable.get(sampleName)
-                    sample.addResult(result)
-                    sample.save()
+                    sample.addResult(params.dsResultName)
+                    sample.save(modify=True)
                 
-                shell('touch '+output)
+                outStr = ' '.join(output)
+                shell('touch '+outStr)
 
             '''
             ruleBldr.setRun(runStr)
