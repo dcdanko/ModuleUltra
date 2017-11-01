@@ -70,7 +70,10 @@ class ModuleUltraConfig:
  
         vPipeName = joinPipelineNameVersion(pipeName, version)
         pipeDir = os.path.join( self.getInstalledPipelinesDir(), vPipeName)
-        rmtree(pipeDir)
+        if os.path.islink(pipeDir):
+            os.unlink(pipeDir)
+        else:
+            rmtree(pipeDir)
         del self.installedPipes[pipeName]
         
     def getSnakefile(self, pipeName, version, fileName):

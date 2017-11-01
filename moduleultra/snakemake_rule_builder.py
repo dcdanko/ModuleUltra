@@ -37,7 +37,7 @@ class SnakemakeRuleBuilder:
                 inputStr += '\t\t{} = "{}",\n'.format(k,v)
         elif type(self.inputs) == list:
             for el in self.inputs:
-                inputStr += '\t\t"{}",\'\n'.format(el)
+                inputStr += '\t\t"{}",\n'.format(el)
 
         inputStr = inputStr[:-2]+'\n' # trim last comma
         ruleStr += inputStr

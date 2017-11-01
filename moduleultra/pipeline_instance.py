@@ -75,6 +75,7 @@ class PipelineInstance:
             
         snakemake( snakefile,
                    config={},
+                   workdir=self.muRepo.getResultDir(),
                    cluster=clusterScript,
                    keepgoing=True,
                    printshellcmds=True,
@@ -183,11 +184,11 @@ class PipelineInstance:
                     recs[fileRecName] = fileRec.filepath()
                 originConf[result.resultType()][sample.name] = recs
         for group in groups:
-            for result in group.getResults(resultTypes=origins):
+            for result in group.allResults(resultTypes=origins):
                 recs = {}
                 for fileRecName, fileRec in result.files():
-                    recs[fileRecName] = fileRec.filePath()
-                originConf[result.resultType][group.name] = recs
+                    recs[fileRecName] = fileRec.filepath()
+                originConf[result.resultType()][group.name] = recs
         conf['origins'] = originConf
         return conf
 
