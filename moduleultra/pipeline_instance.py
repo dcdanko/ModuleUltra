@@ -106,6 +106,8 @@ class PipelineInstance:
             preprocessed += resultSchema.preprocessSnakemake()
             preprocessed += '\n'
 
+        preprocessed = tabify( preprocessed)
+        
         # write to a file
         sfile = self.muRepo.snakemakeFilepath(self.pipelineName)
         with open(sfile, 'w') as sf:
@@ -204,9 +206,31 @@ class PipelineInstance:
     def listSampleTypes(self):
         return [el for el in self.sampleTypes]
 
-    
 
-    
+
+
+def tabify( s):
+    tabwidth = 4
+    tabtoken = ' '*tabwidth
+    out = ''
+    for line in s.split('\n'):
+        prefix = ''
+        newLine = ''
+        inPrefix = True
+        for c in line:
+            if inPrefix and (c == ' '):
+                prefix += ' '
+            elif inPrefix and (c == '\t'):
+                prefix += tabtoken
+            elif inPrefix:
+                inPrefix = False
+            if not inPrefix:
+                newLine += c
+        newPrefix = '\t'* ( (len(prefix) + tabwidth - 1) // tabwidth)
+        out += newPrefix
+        out += newLine
+        out += '\n'
+    return out
     
 
 def runBackticks(obj):
