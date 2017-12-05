@@ -73,7 +73,7 @@ class PipelineInstaller:
         dest = self.muConfig.getInstalledPipelinesDir()
         dest = os.path.join(dest, pipeDir)
         shutil.move(staged, dest)
-        return pipeDir
+        return dest
 
     def installPyPiDependencies(self, pipeDef):
         pass

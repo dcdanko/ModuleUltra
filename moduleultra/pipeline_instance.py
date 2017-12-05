@@ -253,8 +253,12 @@ def runBackticks(obj):
         for c in obj:
            if c == '`':
                if inTicks:
-                   cmdOut = sp.check_output(bticks, shell=True)
-                   out += cmdOut.decode('utf-8').strip()
+                   try:
+                       cmdOut = sp.check_output(bticks, shell=True)
+                       out += cmdOut.decode('utf-8').strip()                       
+                   except sp.CalledProcessError:
+                       print('subcommand "{}" failed'.format(bticks))
+                       out += '""'
                inTicks = not inTicks
            elif inTicks:
                bticks += c
