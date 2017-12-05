@@ -5,6 +5,7 @@ from os import symlink
 from json import loads as jloads
 from moduleultra.utils import *
 from moduleultra.errors import PipelineAlreadyInstalledError
+import packagemega as pm
 
 
 class PipelineInstaller:
@@ -22,9 +23,10 @@ class PipelineInstaller:
     def install(self):
         staged = self.stagePipeline()
         pipeDef = self.provisionallyLoadPipeline(staged)
-        self.loadPipelineFilesIntoConfig(staged, pipeDef)
+        pipeDir = self.loadPipelineFilesIntoConfig(staged, pipeDef)
         self.installPyPiDependencies(pipeDef)
         self.installCondaDependencies(pipeDef)
+        self.runPipelineRecipes(pipeDef, pipeDir)
         self.addPipelineToManifest(pipeDef)
 
     def stagePipeline(self):
@@ -71,6 +73,7 @@ class PipelineInstaller:
         dest = self.muConfig.getInstalledPipelinesDir()
         dest = os.path.join(dest, pipeDir)
         shutil.move(staged, dest)
+        return pipeDir
 
     def installPyPiDependencies(self, pipeDef):
         pass
@@ -87,3 +90,14 @@ class PipelineInstaller:
             self.muConfig.installedPipes[pipeName] += [pipeVersion]
         else:
             self.muConfig.installedPipes[pipeName] = [pipeVersion]
+
+    def runPipelineRecipes(self, pipeDef, pipeDir):
+        try:
+            recipeDir = pipeDef['PACKAGE_MEGA']['RECIPE_DIR']
+        except KeyError:
+            return
+        recipeDir = os.path.join(pipeDir, recipeDir)
+        pmRepo = pm.Repo.loadRepo()
+        recipes = pmRepo.addFromLocal(recipeDir)
+        for recipe in recipes:
+            pmRepo.makeRecipe(recipe)
