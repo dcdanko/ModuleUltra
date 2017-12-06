@@ -75,9 +75,13 @@ class ModuleUltraConfig:
             rmtree(pipeDir)
         del self.installedPipes[pipeName]
 
-    def getSnakefile(self, pipeName, version, fileName):
+    def getPipelineDir(self, pipeName, version):
         vPipeName = joinPipelineNameVersion(pipeName, version)
         pipeDir = os.path.join(self.getInstalledPipelinesDir(), vPipeName)
+        return pipeDir
+    
+    def getSnakefile(self, pipeName, version, fileName):
+        pipeDir = self.getPipelineDir(pipeName, version)
         pipeDef = os.path.join(pipeDir, 'pipeline_definition.json')
         pipeDef = jloads(open(pipeDef).read())
         try:

@@ -68,7 +68,10 @@ def uninstallPipeline(name, version=None):
 @click.argument('uri', nargs=1)
 def reinstallPipeline(name, uri, version=None, dev=False):
     muConfig = ModuleUltraConfig.load()
-    muConfig.uninstallPipeline(name, version=version)
+    try:
+        muConfig.uninstallPipeline(name, version=version)
+    except KeyError:
+        pass # pipeline not installed
     muConfig.installPipeline(uri, dev=dev)
 
 ###############################################################################

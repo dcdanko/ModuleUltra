@@ -140,7 +140,7 @@ class PipelineInstance:
 
         pconf = self.addDataToSnakemakeConf(pconf, samples, groups)
         pconf = self.addOriginsToSnakemakeConf(pconf, origins, samples, groups)
-
+        pconf = self.addPipelineDirToSnakemakeConf(pconf)
         
         confStr = json.dumps(pconf, indent=4)
         '''
@@ -194,6 +194,11 @@ class PipelineInstance:
         conf['origins'] = originConf
         return conf
 
+    def addPipelineDirToSnakemakeConf(self, conf):
+        pipeDir = self.muConfig.getPipelineDir(self.pipelineName, self.pipelineVersion)
+        conf['pipeline_dir'] = pipeDir
+        return conf
+        
     def listFileTypes(self):
         return [el for el in self.fileTypes]
 
@@ -257,7 +262,7 @@ def runBackticks(obj):
                        cmdOut = sp.check_output(bticks, shell=True)
                        out += cmdOut.decode('utf-8').strip()                       
                    except sp.CalledProcessError:
-                       print('subcommand "{}" failed'.format(bticks))
+                       print('subcommand "{}" failed'.format(bticks), file=sys.stderr)
                        out += '""'
                inTicks = not inTicks
            elif inTicks:

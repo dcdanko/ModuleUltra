@@ -18,7 +18,7 @@ class ResultSchema:
         self.module = getOrDefault( schema, 'MODULE', self.name)
         self.level = getOrDefault( schema, 'LEVEL', 'SAMPLE')
 
-        self.snakeFilename = '{}.snkmk'.format(self.module)
+        self.snakeFilename = '{}.smk'.format(self.module)
         self.snakeFilepath = self.muConfig.getSnakefile(self.pipelineName,
                                                         self.pipelineVersion,
                                                         self.snakeFilename)

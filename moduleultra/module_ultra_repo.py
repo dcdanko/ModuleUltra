@@ -78,7 +78,7 @@ class ModuleUltraRepo:
         '''
         Return the path to use for the snakemake file
         '''
-        snakeFile = 'snakemake_{}.snkmk'.format(pipelineName)
+        snakeFile = 'snakemake_{}.smk'.format(pipelineName)
         return os.path.join(self.abspath, snakeFile)
 
     def getResultDir(self):

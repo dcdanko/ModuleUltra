@@ -6,7 +6,7 @@ from json import loads as jloads
 from moduleultra.utils import *
 from moduleultra.errors import PipelineAlreadyInstalledError
 import packagemega as pm
-
+from gimme_input import BoolUserInput
 
 class PipelineInstaller:
     '''
@@ -99,5 +99,10 @@ class PipelineInstaller:
         recipeDir = os.path.join(pipeDir, recipeDir)
         pmRepo = pm.Repo.loadRepo()
         recipes = pmRepo.addFromLocal(recipeDir)
+        installedRecipes = pmRepo.allRecipes()
+        nInstall = len([recipe for recipe in recipes if recipe in installedRecipes])
+        inp = BoolUserInput('Skip {} recipes that are already installed?'.format(nInstall), True)
+        doskip = (nInstall > 0) and inp.resolve()
         for recipe in recipes:
-            pmRepo.makeRecipe(recipe)
+            if (not doskip) or (recipe not in installedRecipes):
+                pmRepo.makeRecipe(recipe)
