@@ -81,12 +81,13 @@ def reinstallPipeline(name, uri, version=None, dev=False):
 @click.option('-p', '--pipeline', default=None, type=str)
 @click.option('-v', '--version', default=None, type=str)
 @click.option('--endpts/--all-endpts', default=False)
+@click.option('--exclude-endpts/--no-exclude-endpts', default=False)
 @click.option('--choose/--all', default=False)
 @click.option('--local/--cluster', default=False)
 @click.option('--dryrun/--wetrun', default=False)
 @click.option('--unlock/--no-unlock', default=False)
 @click.option('-j', '--jobs', default=1)
-def runPipe(pipeline, version, endpts, choose, local, dryrun, unlock, jobs):
+def runPipe(pipeline, version, endpts, exclude_endpts, choose, local, dryrun, unlock, jobs):
     repo = ModuleUltraRepo.loadRepo()
     pipe = repo.getPipelineInstance(pipeline, version=version)
     dsRepo = repo.datasuperRepo()
@@ -94,6 +95,9 @@ def runPipe(pipeline, version, endpts, choose, local, dryrun, unlock, jobs):
     # select sets
     if endpts:
         endpts = UserMultiChoice('What end points should be evaluated?',
+                                 pipe.listEndpoints()).resolve()
+    if exclude_endpts:
+        excludedEndpts = UserMultiChoice('What end points should NOT be evaluated?',
                                  pipe.listEndpoints()).resolve()
     groups = None
     inp = BoolUserInput('Process data from specific sample groups?', False)
@@ -115,7 +119,7 @@ def runPipe(pipeline, version, endpts, choose, local, dryrun, unlock, jobs):
                                   display=lambda x: x.name).resolve()
 
     # run the pipeline
-    pipe.run(endpts=endpts, groups=groups, samples=samples,
+    pipe.run(endpts=endpts, excludeEndpts=excludedEndpts, groups=groups, samples=samples,
              dryrun=dryrun, unlock=unlock, local=local, jobs=jobs)
 
 

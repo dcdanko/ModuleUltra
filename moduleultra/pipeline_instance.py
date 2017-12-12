@@ -49,7 +49,7 @@ class PipelineInstance:
                                                              self.pipelineVersion)
 
     def run(self,
-            endpts=None, groups=None, samples=None,
+            endpts=None, excludeEndpts=None, groups=None, samples=None,
             dryrun=False, unlock=False, jobs=1, local=False):
 
         dsRepo = ds.Repo.loadRepo()
@@ -65,7 +65,9 @@ class PipelineInstance:
             endpts = [schema for schema in self.resultSchema if schema.name in self.endpoints]
         else:
             endpts = [schema for schema in self.resultSchema if schema.name in endpts]
-
+        if excludeEndpts:
+            endpts = [schema for schema in self.resultSchema if schema.name not in excludeEndpts]
+            
             
         preprocessedConf = self.preprocessConf(self.origins, samples, groups)
         snakefile = self.preprocessSnakemake( preprocessedConf, endpts, samples, groups)
@@ -118,6 +120,8 @@ class PipelineInstance:
     def makeSnakemakeAllRule(self, endpts, samples, groups):
         ruleBldr = SnakemakeRuleBuilder('all')
         for schema in endpts:
+            if schema.isOrigin():
+                continue
             pattern = schema.getOutputFilePattern()
             if schema.level == 'SAMPLE':
                 for sample in samples:
