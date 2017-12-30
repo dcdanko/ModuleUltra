@@ -98,7 +98,7 @@ class PipelineInstaller:
             return
         recipeDir = os.path.join(pipeDir, recipeDir)
         pmRepo = pm.Repo.loadRepo()
-        recipes = pmRepo.addFromLocal(recipeDir)
+        recipes = pmRepo.addFromLocal(recipeDir, dev=self.dev)
         installedRecipes = pmRepo.allRecipes()
         nInstall = len([recipe for recipe in recipes if recipe in installedRecipes])
         inp = BoolUserInput('Skip {} recipes that are already installed?'.format(nInstall), True)

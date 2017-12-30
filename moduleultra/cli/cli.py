@@ -96,6 +96,7 @@ def runPipe(pipeline, version, endpts, exclude_endpts, choose, local, dryrun, un
     if endpts:
         endpts = UserMultiChoice('What end points should be evaluated?',
                                  pipe.listEndpoints()).resolve()
+    excludedEndpts = []
     if exclude_endpts:
         excludedEndpts = UserMultiChoice('What end points should NOT be evaluated?',
                                  pipe.listEndpoints()).resolve()
