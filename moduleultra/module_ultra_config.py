@@ -49,6 +49,9 @@ class ModuleUltraConfig:
         pipeDef = jloads(pipeDef)
         return pipeDef
 
+    def setClusterSubmitScript(self, script):
+        self.configVars['CLUSTER_SUBMIT_SCRIPT'] = os.path.abspath(script)
+
     def clusterSubmitScript(self):
         try:
             cScript = self.configVars['CLUSTER_SUBMIT_SCRIPT']
@@ -79,7 +82,7 @@ class ModuleUltraConfig:
         vPipeName = joinPipelineNameVersion(pipeName, version)
         pipeDir = os.path.join(self.getInstalledPipelinesDir(), vPipeName)
         return pipeDir
-    
+
     def getSnakefile(self, pipeName, version, fileName):
         pipeDir = self.getPipelineDir(pipeName, version)
         pipeDef = os.path.join(pipeDir, 'pipeline_definition.json')

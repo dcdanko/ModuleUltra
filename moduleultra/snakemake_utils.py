@@ -2,6 +2,10 @@ from .utils import joinResultNameType
 import datasuper as ds
 
 
+def getSample(resultFilename):
+    return resultFilename.split('/')[-1].split('.')[0]
+
+
 def getOriginResultFiles(config, resultType, fileType):
     '''
     N.B. This function returns another function!
@@ -30,7 +34,7 @@ def expandGroup(*samplePatterns):
         patterns = []
         for sample in group.allSamples():
             for pattern in samplePatterns:
-                p = pattern.format(sample_name= sample.name)
+                p = pattern.format(sample_name=sample.name)
                 patterns.append(p)
         return patterns
 

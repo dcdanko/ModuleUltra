@@ -28,8 +28,11 @@ class SnakemakeRuleBuilder:
         self.run = val
         
 
-    def __str__(self):
-        ruleStr = '\nrule {}:\n'.format(self.name)
+    def __str__(self, local=True):
+        ruleStr = ''
+        if local:
+            ruleStr += '\nlocalrules: {}\n'.format(self.name)
+        ruleStr += '\nrule {}:\n'.format(self.name)
         
         inputStr = '\tinput:\n'
         if type(self.inputs) == dict:

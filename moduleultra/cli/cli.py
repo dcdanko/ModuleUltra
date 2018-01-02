@@ -20,6 +20,18 @@ def init():
     except ModuleUltraRepoAlreadyExists:
         print('Repo already exists.', file=sys.stderr)
 
+
+@main.group()
+def config():
+    pass
+
+
+@config.command(name='cluster_submit')
+@click.argument('script')
+def setSubmitScript(script):
+    muConfig = ModuleUltraConfig.load()
+    muConfig.setClusterSubmitScript(script)
+
 ###############################################################################
 
 
