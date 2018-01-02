@@ -1,0 +1,6 @@
+snakemake==4.1.0
+click==6.7
+yaml-backed-structs==0.9.0
+-e git+git@github.com:dcdanko/gimme_input.git
+-e git+git@github.com:dcdanko/DataSuper.git
+-e git+git@github.com:dcdanko/PackageMega.git
