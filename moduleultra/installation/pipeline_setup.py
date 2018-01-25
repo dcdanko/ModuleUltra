@@ -38,7 +38,7 @@ class PipelineInstaller:
     def stageFromLocal(self):
         dest = self.muConfig.getInstalledPipelinesDir()
         dest = os.path.join(dest, PipelineInstaller.stagingDir)
-        uri = self.uri
+        uri = os.path.abspath(self.uri)
         if uri[-1] == '/':
             uri = uri[:-1]
         hname = uri.split('/')[-1].split('.')[0]
