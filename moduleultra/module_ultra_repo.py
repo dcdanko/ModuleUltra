@@ -118,7 +118,7 @@ class ModuleUltraRepo:
         up = os.path.dirname(startPath)
         if up == startPath:
             raise NoModuleUltraRepoFoundError()
-        return repoDir(startDir=up)
+        return ModuleUltraRepo.repoDir(startDir=up)
 
     @staticmethod
     def loadRepo(startDir='.'):
