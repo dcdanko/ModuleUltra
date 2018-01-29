@@ -111,7 +111,10 @@ class ModuleUltraRepo:
         '''
         returns the abspath for the .module_ultra directory
         '''
-        startPath = os.path.abspath(startDir)
+        if startDir == '.':
+            startPath = os.getenv('PWD')
+        else:
+            startPath = os.path.abspath(startDir)
         if ModuleUltraRepo.repoDirName in os.listdir(startPath):
             repoPath = os.path.join(startPath, ModuleUltraRepo.repoDirName)
             return repoPath
@@ -141,6 +144,8 @@ class ModuleUltraRepo:
             p = os.path.abspath(root)
             p = os.path.join(p, ModuleUltraRepo.repoDirName)
             os.makedirs(p)
+            logDir = os.path.join(p, 'run_logs')
+            os.makedirs(logDir)
             p = os.path.join(p, ModuleUltraRepo.resultDirName)
             os.makedirs(p)
         except FileExistsError:

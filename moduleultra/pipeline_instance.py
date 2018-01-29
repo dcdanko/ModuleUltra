@@ -2,12 +2,13 @@ from snakemake import snakemake
 from .utils import *
 from datasuper.utils import parsers as dsparsers
 from .result_schema import ResultSchema
-import subprocess as sp
 import json
 import sys
 import datasuper as ds
 from .snakemake_rule_builder import SnakemakeRuleBuilder
 from time import time
+from .pipeline_instance_utils import *
+from .pipeline_instance_snakemake_utils import *
 
 
 class PipelineInstance:
@@ -31,6 +32,15 @@ class PipelineInstance:
         self.sampleTypes = pipelineDef['SAMPLE_TYPES']
 
         self.resultSchema = []
+        '''
+        if 'RESULT_DEFINITIONS' in pipelineDef:
+            for fname in schema['RESULT_DEFINITIONS']:
+                schema = loadResultDefinition(fname)
+                self.resultSchema.append(ResultSchema(muRepo,
+                                                      self.pipelineName,
+                                                      self.pipelineVersion,
+                                                      schema))
+        '''
         for schema in pipelineDef['RESULT_TYPES']:
             self.resultSchema.append(ResultSchema(muRepo,
                                                   self.pipelineName,
@@ -57,12 +67,19 @@ class PipelineInstance:
         dsRepo = ds.Repo.loadRepo()
         if not groups:
             groups = dsRepo.db.sampleGroupTable.getAll()
+            if not samples:
+                samples = dsRepo.db.sampleTable.getAll()
+            else:
+                samples = dsRepo.db.sampleTable.getMany(samples)
         else:
             groups = dsRepo.db.sampleGroupTable.getMany(groups)
-        if not samples:
-            samples = dsRepo.db.sampleTable.getAll()
-        else:
-            samples = dsRepo.db.sampleTable.getMany(samples)
+            if not samples:
+                samples = []
+                for group in groups:
+                    samples += group.samples()
+            else:
+                samples = dsRepo.db.sampleTable.getMany(samples)
+
         if not endpts:
             endpts = [schema
                       for schema in self.resultSchema
@@ -76,7 +93,10 @@ class PipelineInstance:
                       for schema in self.resultSchema
                       if schema.name not in excludeEndpts]
 
-        preprocessedConf = self.preprocessConf(self.origins, samples, groups)
+        preprocessedConf = self.preprocessConf(self.origins,
+                                               samples,
+                                               groups,
+                                               endpts)
         snakefile = self.preprocessSnakemake(preprocessedConf,
                                              endpts,
                                              samples,
@@ -107,26 +127,15 @@ class PipelineInstance:
                   nodes=jobs)
 
     def preprocessSnakemake(self, confStr, endpts, samples, groups):
-        preprocessed = ''
-
-        # add imports
-        preprocessed += 'import os.path\n'
-        preprocessed += 'import datasuper as ds\n'
-        preprocessed += 'from moduleultra.snakemake_utils import *\n'
-
-        # add conf
-        preprocessed += '\nconfig={}\n\n'.format(confStr)
-
-        # add all rule
-        preprocessed += self.makeSnakemakeAllRule(endpts, samples, groups)
+        preprocessed = initialImports()
+        preprocessed += '\nconfig={}\n\n'.format(confStr)  # add conf
+        preprocessed += makeSnakemakeAllRule(endpts, samples, groups)
 
         # add individual results
         for resultSchema in self.resultSchema:
-            if resultSchema.isOrigin():
-                continue
-            preprocessed += resultSchema.preprocessSnakemake()
-            preprocessed += '\n'
-
+            if (resultSchema in endpts) and (not resultSchema.isOrigin()):
+                preprocessed += resultSchema.preprocessSnakemake()
+                preprocessed += '\n'
         preprocessed = tabify(preprocessed)
 
         # write to a file
@@ -135,69 +144,28 @@ class PipelineInstance:
             sf.write(preprocessed)
         return sfile
 
-    def makeSnakemakeAllRule(self, endpts, samples, groups):
-        ruleBldr = SnakemakeRuleBuilder('all')
-        for schema in endpts:
-            if schema.isOrigin():
-                continue
-            pattern = schema.getOutputFilePattern()
-            if schema.level == 'SAMPLE':
-                for sample in samples:
-                    inp = pattern.format(sample_name=sample.name)
-                    ruleBldr.addInput(inp)
-            elif schema.level == 'GROUP':
-                for group in groups:
-                    inp = pattern.format(group_name=group.name)
-                    ruleBldr.addInput(inp)
-            else:
-                print(schema.level, file=sys.stderr)
-                assert False
-        return str(ruleBldr)
-
-    def preprocessConf(self, origins, samples, groups):
-        pconf = json.loads(open(self.snakemakeConf).read())
+    def preprocessConf(self, origins, samples, groups, endpts):
+        confF = self.snakemakeConf
+        ext = confF.split('.')[-1]
+        if ext == 'json':
+            pconf = openJSONConf(confF)
+        elif ext == 'py':
+            pconf = openPythonConf(confF)
         pconf = runBackticks(pconf)
         for resultSchema in self.resultSchema:
-            resultSchema.preprocessConf(pconf)
+            if resultSchema in endpts:
+                resultSchema.preprocessConf(pconf)
 
-        pconf = self.addDataToSnakemakeConf(pconf, samples, groups)
-        pconf = self.addOriginsToSnakemakeConf(pconf, origins, samples, groups)
-        pconf = self.addPipelineDirToSnakemakeConf(pconf)
+        pconf = addFinalPatternsToConf(pconf, endpts, samples, groups)
+        pconf = addDataToSnakemakeConf(pconf, samples, groups)
+        pconf = addOriginsToSnakemakeConf(pconf, origins, samples, groups)
+        pipeDir = self.muConfig.getPipelineDir(self.pipelineName,
+                                               self.pipelineVersion)
+        pconf['pipeline_dir'] = pipeDir
 
         confStr = json.dumps(pconf, indent=4)
 
         return confStr
-
-    def addDataToSnakemakeConf(self, conf, samples, groups):
-        sampleConf = {}
-        for sample in samples:
-            sampleConf[sample.name] = {'sample_type': sample.sampleType}
-        conf['samples'] = sampleConf
-        return conf
-
-    def addOriginsToSnakemakeConf(self, conf, origins, samples, groups):
-        originConf = {origin: {} for origin in origins}
-
-        for sample in samples:
-            for result in sample.results(resultTypes=origins):
-                recs = {}
-                for fileRecName, fileRec in result.files():
-                    recs[fileRecName] = fileRec.filepath()
-                originConf[result.resultType()][sample.name] = recs
-        for group in groups:
-            for result in group.allResults(resultTypes=origins):
-                recs = {}
-                for fileRecName, fileRec in result.files():
-                    recs[fileRecName] = fileRec.filepath()
-                originConf[result.resultType()][group.name] = recs
-        conf['origins'] = originConf
-        return conf
-
-    def addPipelineDirToSnakemakeConf(self, conf):
-        pipeDir = self.muConfig.getPipelineDir(self.pipelineName,
-                                               self.pipelineVersion)
-        conf['pipeline_dir'] = pipeDir
-        return conf
 
     def listFileTypes(self):
         return [el for el in self.fileTypes]
@@ -211,67 +179,3 @@ class PipelineInstance:
     def listSampleTypes(self):
         return [el for el in self.sampleTypes]
 
-
-def tabify(s):
-    tabwidth = 4
-    tabtoken = ' ' * tabwidth
-    out = ''
-    for line in s.split('\n'):
-        prefix = ''
-        newLine = ''
-        inPrefix = True
-        for c in line:
-            if inPrefix and (c == ' '):
-                prefix += ' '
-            elif inPrefix and (c == '\t'):
-                prefix += tabtoken
-            elif inPrefix:
-                inPrefix = False
-            if not inPrefix:
-                newLine += c
-        newPrefix = '\t' * ((len(prefix) + tabwidth - 1) // tabwidth)
-        out += newPrefix
-        out += newLine
-        out += '\n'
-    return out
-
-
-def runBackticks(obj):
-    if type(obj) == dict:
-        out = {}
-        for k, v in obj.items():
-            out[k] = runBackticks(v)
-        return out
-    elif type(obj) == list:
-        out = []
-        for el in obj:
-            out.append(runBackticks(el))
-        return out
-    elif type(obj) == str:
-        if '`' not in obj:
-            return obj
-        out = ''
-        bticks = ''
-        inTicks = False
-        for c in obj:
-            if c == '`':
-                if inTicks:
-                    try:
-                        cmdOut = sp.check_output(bticks, shell=True)
-                        out += cmdOut.decode('utf-8').strip()
-                    except sp.CalledProcessError:
-                        print('subcommand "{}" failed'.format(bticks),
-                              file=sys.stderr)
-                        out += '""'
-                inTicks = not inTicks
-            elif inTicks:
-                bticks += c
-            else:
-                out += c
-        return out
-    elif type(obj) == int:
-        return str(obj)
-    else:
-        print(type(obj), file=sys.stderr)
-        print(obj, file=sys.stderr)
-        assert False  # panic

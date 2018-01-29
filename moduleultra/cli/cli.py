@@ -92,24 +92,27 @@ def reinstallPipeline(name, uri, version=None, dev=False):
 @main.command(name='run')
 @click.option('-p', '--pipeline', default=None, type=str)
 @click.option('-v', '--version', default=None, type=str)
-@click.option('--endpts/--all-endpts', default=False)
-@click.option('--exclude-endpts/--no-exclude-endpts', default=False)
+@click.option('--choose-endpts/--all-endpts', default=False)
+@click.option('--choose-exclude-endpts/--no-exclude-endpts', default=False)
+@click.option('--exclude-endpts', default='', type=str, help='list of comma-separated names')
 @click.option('--choose/--all', default=False)
 @click.option('--local/--cluster', default=False)
 @click.option('--dryrun/--wetrun', default=False)
 @click.option('--unlock/--no-unlock', default=False)
 @click.option('-j', '--jobs', default=1)
-def runPipe(pipeline, version, endpts, exclude_endpts, choose, local, dryrun, unlock, jobs):
+def runPipe(pipeline, version, choose_endpts, choose_exclude_endpts, exclude_endpts, choose, local, dryrun, unlock, jobs):
     repo = ModuleUltraRepo.loadRepo()
     pipe = repo.getPipelineInstance(pipeline, version=version)
     dsRepo = repo.datasuperRepo()
 
     # select sets
-    if endpts:
+    endpts = False
+    if choose_endpts:
         endpts = UserMultiChoice('What end points should be evaluated?',
                                  pipe.listEndpoints()).resolve()
-    excludedEndpts = []
-    if exclude_endpts:
+    
+    excludedEndpts = exclude_endpts.split(',')
+    if choose_exclude_endpts:
         excludedEndpts = UserMultiChoice('What end points should NOT be evaluated?',
                                  pipe.listEndpoints()).resolve()
     groups = None
@@ -121,7 +124,7 @@ def runPipe(pipeline, version, endpts, exclude_endpts, choose, local, dryrun, un
     samples = None
     inp = BoolUserInput('Process data from a specific samples?', False)
     if choose and inp.resolve():
-        if groups is None:
+        if groups is not None:
             samplesToChooseFrom = []
             for group in groups:
                 samplesToChooseFrom += group.samples()

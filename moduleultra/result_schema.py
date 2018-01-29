@@ -4,6 +4,7 @@ from .snakemake_rule_builder import SnakemakeRuleBuilder
 from .snakemake_utils import *
 from .utils import *
 
+
 class ResultSchema:
 
     def __init__(self, muRepo, pipeName, pipeVersion, schema, origin=False):
@@ -12,8 +13,10 @@ class ResultSchema:
         self.pipelineName = pipeName
         self.pipelineVersion = pipeVersion
         self.origin = origin
-        
-        self.name = schema['NAME']  # this is the name of the result type in datasuper as well
+
+        # this is the name of the result type in datasuper as well
+        self.name = schema['NAME']
+
         self.dependencies = getOrDefault(schema, 'DEPENDENCIES', [])
         self.module = getOrDefault(schema, 'MODULE', self.name)
         self.level = getOrDefault(schema, 'LEVEL', 'SAMPLE')
@@ -37,8 +40,8 @@ class ResultSchema:
             ext = dsRepo.getFileTypeExt(ftype)
             fpattern = self._makeFilePattern(fname, ext)
             ruleBldr.addInput(fname, fpattern)
-            
-        ruleBldr.setOutput(self.getOutputFilePattern())            
+
+        ruleBldr.setOutput(self.getOutputFilePattern())
 
         resName = joinResultNameType('{sample_name}', self.name)
         ruleBldr.addParam('dsResultName', resName)
@@ -46,7 +49,7 @@ class ResultSchema:
         ruleBldr.addParam('dsResultType', self.name)
         for fname, ftype in self.files.items():
             ruleBldr.addParam(fname, ftype)
-            
+
         runStr = '''
             with ds.Repo.loadRepo() as dsrepo:
                 fileRecs = {}
@@ -54,23 +57,23 @@ class ResultSchema:
                     name = os.path.basename(fpath)
                     abspath = os.path.abspath(fpath)
                     fileType = params[fname]
-                    fileRec = ds.FileRecord( dsrepo, name=name, filepath=abspath, file_type=fileType)
-                    print( '[DataSuper] Saving File: {}'.format(fileRec), file=sys.stderr)
+                    fileRec = ds.FileRecord(dsrepo, name=name, filepath=abspath, file_type=fileType)
+                    print('[DataSuper] Saving File: {}'.format(fileRec), file=sys.stderr)
                     try:
                         fileRec.save()
                     except ds.database.RecordExistsError as ree:
                         print( '[DataSuper] Record already exists, this is usually ok but the error is reproduced below: {}'.format(ree), file=sys.stderr)
                     fileRecs[fname] = name
 
-                result = ds.ResultRecord( dsrepo,
-                                          name=params.dsResultName,
-                                          result_type=params.dsResultType,
-                                          file_records=fileRecs)
-                print( '[DataSuper] Saving Result: {}'.format(result), file=sys.stderr)
+                result = ds.ResultRecord(dsrepo,
+                                         name=params.dsResultName,
+                                         result_type=params.dsResultType,
+                                         file_records=fileRecs)
+                print('[DataSuper] Saving Result: {}'.format(result), file=sys.stderr)
                 try:
                     result.save()
                 except ds.database.RecordExistsError as ree:
-                    print( '[DataSuper] Record already exists: {}'.format(ree), file=sys.stderr)
+                    print('[DataSuper] Record already exists: {}'.format(ree), file=sys.stderr)
 
                 try:
                     sampleName = params.sampleName
@@ -80,15 +83,14 @@ class ResultSchema:
                     sample = dsrepo.db.sampleTable.get(sampleName)
                     sample.addResult(params.dsResultName)
                     sample.save(modify=True)
-                
+
                 outStr = ' '.join(output)
                 shell('touch '+outStr)
 
             '''
         ruleBldr.setRun(runStr)
-            
-        return str(ruleBldr)
 
+        return str(ruleBldr)
 
     def _makeGroupLevelRegisterRule(self):
         ruleBldr = SnakemakeRuleBuilder('register_{}'.format(self.module))
@@ -96,19 +98,19 @@ class ResultSchema:
         dsRepo = ds.Repo.loadRepo()
         for fname, ftype in self.files.items():
             ext = dsRepo.getFileTypeExt(ftype)
-            fpattern = self._makeFilePattern( fname, ext)
+            fpattern = self._makeFilePattern(fname, ext)
             ruleBldr.addInput(fname, fpattern)
-            
-        ruleBldr.setOutput( self.getOutputFilePattern())            
+
+        ruleBldr.setOutput(self.getOutputFilePattern())
 
         resName = joinResultNameType('{group_name}', self.name)
         ruleBldr.addParam('dsResultName', resName)
         ruleBldr.addParam('groupName', '{group_name}')
         ruleBldr.addParam('dsResultType', self.name)
         for fname, ftype in self.files.items():
-            ruleBldr.addParam( fname, ftype)
-            
-        runStr =  '''
+            ruleBldr.addParam(fname, ftype)
+
+        runStr = '''
             with ds.Repo.loadRepo() as dsrepo:
                 fileRecs = {}
                 for fname, fpath in input.items():
@@ -116,22 +118,22 @@ class ResultSchema:
                     abspath = os.path.abspath(fpath)
                     fileType = params[fname]
                     fileRec = ds.FileRecord( dsrepo, name=name, filepath=abspath, file_type=fileType)
-                    print( '[DataSuper] Saving File: {}'.format(fileRec), file=sys.stderr)
+                    print('[DataSuper] Saving File: {}'.format(fileRec), file=sys.stderr)
                     try:
                         fileRec.save()
                     except ds.database.RecordExistsError as ree:
-                        print( '[DataSuper] Record already exists: {}'.format(ree), file=sys.stderr)
+                        print('[DataSuper] Record already exists: {}'.format(ree), file=sys.stderr)
                     fileRecs[fname] = name
 
                 result = ds.ResultRecord( dsrepo,
                                           name=params.dsResultName,
                                           result_type=params.dsResultType,
                                           file_records=fileRecs)
-                print( '[DataSuper] Saving Result: {}'.format(result), file=sys.stderr)
+                print('[DataSuper] Saving Result: {}'.format(result), file=sys.stderr)
                 try:
                     result.save()
                 except ds.database.RecordExistsError as ree:
-                    print( '[DataSuper] Record already exists: {}'.format(ree), file=sys.stderr)
+                    print('[DataSuper] Record already exists: {}'.format(ree), file=sys.stderr)
 
                 try:
                     groupName = params.groupName
@@ -141,13 +143,13 @@ class ResultSchema:
                     sgroup = dsrepo.db.sampleGroupTable.get(groupName)
                     sgroup.addResult(params.dsResultName)
                     sgroup.save(modify=True)
-                
+
                 outStr = ' '.join(output)
                 shell('touch '+outStr)
 
             '''
         ruleBldr.setRun(runStr)
-            
+
         return str(ruleBldr)
 
     def makeRegisterRule(self):
@@ -170,7 +172,7 @@ class ResultSchema:
             return self._makeSampleLevelRegisterRule()
         elif self.level == 'GROUP':
             return self._makeGroupLevelRegisterRule()
-        
+
     def preprocessSnakemake(self):
         '''
         Every result schema preprocesses its own snakefile
@@ -202,7 +204,6 @@ class ResultSchema:
         for fname, ftype in self.files.items():
             ext = dsRepo.getFileTypeExt(ftype)
             if self.isOrigin():
-                # fpattern = "$$$ getOriginResultFiles( \"{}\", \"{}\") $$$".format(self.module, fname)
                 fpattern = ""
             else:
                 fpattern = self._makeFilePattern(fname, ext)
