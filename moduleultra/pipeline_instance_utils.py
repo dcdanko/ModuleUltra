@@ -4,12 +4,44 @@ import subprocess as sp
 import sys
 import os.path
 from inspect import getmembers
+import datasuper as ds
+
 
 def openJSONConf(confF):
+    '''Read a JSON file and return the deserialized object.'''
     return json.loads(open(confF).read())
 
 
+def preprocessSamplesAndGroups(samples, groups):
+    '''Return the appropriate list of samples and groups.
+
+    If `groups` is None return a list of all available groups.
+    If `samples` is None return a list of all the samples
+    implied by `groups`. Otherwise return the samples in `samples`.
+
+    Return everything as DataSuper records, not strings.
+    '''
+
+    dsRepo = ds.Repo.loadRepo()
+    if not groups:
+        groups = dsRepo.db.sampleGroupTable.getAll()
+        if not samples:
+            samples = dsRepo.db.sampleTable.getAll()
+        else:
+            samples = dsRepo.db.sampleTable.getMany(samples)
+    else:
+        groups = dsRepo.db.sampleGroupTable.getMany(groups)
+        if not samples:
+            samples = []
+            for group in groups:
+                samples += group.samples()
+        else:
+            samples = dsRepo.db.sampleTable.getMany(samples)
+    return samples, groups
+
+
 def openPythonConf(confF):
+    '''Read and resolve a python config file. Return the result.'''
     importName = os.path.basename(confF)[:-3]
     sys.path.append(os.path.dirname(confF))
     __import__(importName)
@@ -21,6 +53,7 @@ def openPythonConf(confF):
 
 
 def loadResultDefinition(fname):
+    '''Deserialize `fname` appropriate to extension. Return the result.'''
     ext = fname.split('.')[-1]
     fstr = open(fname).read()
     if ext == 'json':
@@ -30,6 +63,7 @@ def loadResultDefinition(fname):
 
 
 def tabify(s):
+    '''Convert all groups of 4 spaces in `s` to tabs. Return the result.'''
     tabwidth = 4
     tabtoken = ' ' * tabwidth
     out = ''
@@ -54,6 +88,7 @@ def tabify(s):
 
 
 def runBackticks(obj):
+    '''Resolve all commands between bacticks in a JSONable object.'''
     if type(obj) == dict:
         out = {}
         for k, v in obj.items():

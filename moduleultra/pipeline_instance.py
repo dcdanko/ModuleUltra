@@ -12,7 +12,8 @@ from .pipeline_instance_snakemake_utils import *
 
 
 class PipelineInstance:
-    '''
+    '''Represents an instance of a pipeline in a repo.
+
     This is the class that handles actually running the pipeline.
 
     This is also used for other more basic calls (like seeing what
@@ -32,15 +33,6 @@ class PipelineInstance:
         self.sampleTypes = pipelineDef['SAMPLE_TYPES']
 
         self.resultSchema = []
-        '''
-        if 'RESULT_DEFINITIONS' in pipelineDef:
-            for fname in schema['RESULT_DEFINITIONS']:
-                schema = loadResultDefinition(fname)
-                self.resultSchema.append(ResultSchema(muRepo,
-                                                      self.pipelineName,
-                                                      self.pipelineVersion,
-                                                      schema))
-        '''
         for schema in pipelineDef['RESULT_TYPES']:
             self.resultSchema.append(ResultSchema(muRepo,
                                                   self.pipelineName,
@@ -63,36 +55,39 @@ class PipelineInstance:
     def run(self,
             endpts=None, excludeEndpts=None, groups=None, samples=None,
             dryrun=False, unlock=False, jobs=1, local=False):
+        '''Run this pipeline.
 
-        dsRepo = ds.Repo.loadRepo()
-        if not groups:
-            groups = dsRepo.db.sampleGroupTable.getAll()
-            if not samples:
-                samples = dsRepo.db.sampleTable.getAll()
-            else:
-                samples = dsRepo.db.sampleTable.getMany(samples)
-        else:
-            groups = dsRepo.db.sampleGroupTable.getMany(groups)
-            if not samples:
-                samples = []
-                for group in groups:
-                    samples += group.samples()
-            else:
-                samples = dsRepo.db.sampleTable.getMany(samples)
+        To do this:
+            Get correct lists of samples and groups to be processed.
+            Get correct list of endpoints to be processed.
+            Build a conf for the master snakefile.
+            Build a master snakefile.
+            Get the cluster submission script.
+            Get the jobname template.
+            Run snakemake.
 
-        if not endpts:
-            endpts = [schema
-                      for schema in self.resultSchema
-                      if schema.name in self.endpoints]
-        else:
-            endpts = [schema
-                      for schema in self.resultSchema
-                      if schema.name in endpts]
-        if excludeEndpts:
-            endpts = [schema
-                      for schema in self.resultSchema
-                      if schema.name not in excludeEndpts]
-
+        Args:
+            endpts (:obj:`[str]`, optional): A list of endpoints that should
+                be run. If None run all endpoints.
+            excludeEndpts (:obj:`[str]`, optional): A list of endpoints that
+                should not be run. Takes precedence over anything in
+                endpoints. If None, do not filter any endpoints.
+            groups (:obj:`[str]`, optional): A list of groups to process. All
+                samples in each group will also be processed. May be a list of
+                strings or datasuper group objects.
+            samples (:obj:`[str]`, optional): A list of samples to process.
+                May be a list of strings or datasuper group objects.
+            dryrun (:obj:`bool`, optional): Do not actually run the pipeline.
+                Just print out a list of jobs that would be run.
+            unlock (:obj:`bool`, optional): Unlock the snakemake directory.
+                Do nothing else.
+            jobs (:obj:`int`, optional): The number of jobs that should be
+                run at once. Defaults to one.
+            local (:obj:`bool`, optional): Run all jobs on the local machine.
+                Defaults to False.
+        '''
+        samples, groups = preprocessSamplesAndGroups(samples, groups)
+        endpts = self.preprocessEndpoints(endpts, excludeEndpts)
         preprocessedConf = self.preprocessConf(self.origins,
                                                samples,
                                                groups,
@@ -101,17 +96,8 @@ class PipelineInstance:
                                              endpts,
                                              samples,
                                              groups)
-        clusterScript = None
-        if not local:
-            clusterScript = self.muRepo.muConfig.clusterSubmitScript()
-            clusterScript += ' {}'.format(int(time()))
-
-        snkmkJobnameTemplate = ('MUJOB_',
-                                self.pipelineName,
-                                '_{rulename}',
-                                '_{jobid}')
-
-        snkmkJobnameTemplate = ''.join(snkmkJobnameTemplate)
+        clusterScript = self.getClusterSubmitScript(local)
+        snkmkJobnameTemplate = self.getSnakemakeJobnameTemplate()
 
         snakemake(snakefile,
                   config={},
@@ -126,7 +112,45 @@ class PipelineInstance:
                   jobname=snkmkJobnameTemplate,
                   nodes=jobs)
 
+    def getSnakemakeJobnameTemplate(self):
+        '''Return a jobname template based on this pipeline instance.'''
+        snkmkJobnameTemplate = ('MUJOB_',
+                                self.pipelineName,
+                                '_{rulename}',
+                                '_{jobid}')
+        snkmkJobnameTemplate = ''.join(snkmkJobnameTemplate)
+        return snkmkJobnameTemplate
+
+    def getClusterSubmitScript(self, local):
+        '''Return the cluster submit script to use for jobs.'''
+        clusterScript = None
+        if not local:
+            clusterScript = self.muRepo.muConfig.clusterSubmitScript()
+            clusterScript += ' {}'.format(int(time()))
+        return clusterScript
+
+    def preprocessEndpoints(self, endpts, excludeEndpts):
+        '''Return the correct list of endpoints to run.
+
+        If `endpts` is not None only return endpoints that are
+        in `endpts` but never return endpoints in `excludeEndpts`.
+        '''
+        if not endpts:
+            endpts = [schema
+                      for schema in self.resultSchema
+                      if schema.name in self.endpoints]
+        else:
+            endpts = [schema
+                      for schema in self.resultSchema
+                      if schema.name in endpts]
+        if excludeEndpts:
+            endpts = [schema
+                      for schema in self.resultSchema
+                      if schema.name not in excludeEndpts]
+        return endpts
+
     def preprocessSnakemake(self, confStr, endpts, samples, groups):
+        '''Return the abspath to a master snakefile that can be run.'''
         preprocessed = initialImports()
         preprocessed += '\nconfig={}\n\n'.format(confStr)  # add conf
         preprocessed += makeSnakemakeAllRule(endpts, samples, groups)
@@ -145,6 +169,7 @@ class PipelineInstance:
         return sfile
 
     def preprocessConf(self, origins, samples, groups, endpts):
+        '''Make a config object and return a JSON str of that object.'''
         confF = self.snakemakeConf
         ext = confF.split('.')[-1]
         if ext == 'json':
@@ -168,14 +193,17 @@ class PipelineInstance:
         return confStr
 
     def listFileTypes(self):
+        '''Return a list of file types in this pipeline.'''
         return [el for el in self.fileTypes]
 
     def listEndpoints(self):
+        '''Return a list of endpoints in this pipeline.'''
         return self.endpoints
 
     def listResultSchema(self):
+        '''Return a list of result schema in this pipeline.'''
         return [schema for schema in self.resultSchema]
 
     def listSampleTypes(self):
+        '''Return a list of sample types in this pipeline.'''
         return [el for el in self.sampleTypes]
-

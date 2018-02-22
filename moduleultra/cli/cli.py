@@ -102,6 +102,9 @@ def reinstallPipeline(name, uri, version=None, dev=False):
 @click.option('-j', '--jobs', default=1)
 def runPipe(pipeline, version, choose_endpts, choose_exclude_endpts, exclude_endpts, choose, local, dryrun, unlock, jobs):
     repo = ModuleUltraRepo.loadRepo()
+    if pipeline is None:
+        pipeline = UserChoice('pipeline', repo.listPipelines()).resolve()
+
     pipe = repo.getPipelineInstance(pipeline, version=version)
     dsRepo = repo.datasuperRepo()
 
