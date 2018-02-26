@@ -12,7 +12,7 @@ def initialImports():
 
 
 def wildcardConstraints():
-    regex = '[a-zA-Z0-9_-]'
+    regex = '[a-zA-Z0-9_-]+'
     constraints = 'wildcard_constraints:\n'
     constraints += '    sample_name="{}",\n'.format(regex)
     constraints += '    group_name="{}",\n'.format(regex)
@@ -20,22 +20,25 @@ def wildcardConstraints():
 
 
 def makeSnakemakeAllRule(endpts, samples, groups):
-    allRule = 'rule all:\n\tinput: config["final_inputs"]\n'
+    allRule = 'rule all:\n\tinput: inputsToAllRule(config)\n'
     return allRule
 
 
 def addFinalPatternsToConf(conf, endpts, samples, groups):
-    allInps = []
+    allInps = {'sample_patterns': [],
+               'group_patterns': []}
     for schema in endpts:
         if schema.isOrigin():
             continue
         pattern = schema.getOutputFilePattern()
         if schema.level == 'SAMPLE':
-            for sample in samples:
-                allInps.append(pattern.format(sample_name=sample.name))
+            allInps['sample_patterns'].append(pattern)
+            #for sample in samples:
+            #    allInps['sample_names'].append(sample.name)
         elif schema.level == 'GROUP':
-            for group in groups:
-                allInps.append(pattern.format(group_name=group.name))
+            allInps['group_patterns'].append(pattern)
+            #for group in groups:
+            #    allInps['group_names'].append(group.name)
         else:
             print(schema.level, file=sys.stderr)
             assert False
