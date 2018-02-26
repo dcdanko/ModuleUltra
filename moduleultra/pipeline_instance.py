@@ -152,6 +152,7 @@ class PipelineInstance:
     def preprocessSnakemake(self, confStr, endpts, samples, groups):
         '''Return the abspath to a master snakefile that can be run.'''
         preprocessed = initialImports()
+        preprocessed += wildcardConstraints()
         preprocessed += '\nconfig={}\n\n'.format(confStr)  # add conf
         preprocessed += makeSnakemakeAllRule(endpts, samples, groups)
 

@@ -10,6 +10,16 @@ def initialImports():
     return preprocessed
 
 
+def wildcardConstraints():
+    regex = '[a-zA-Z0-9_-]'
+    constraints = '''
+    wildcard_constraints:
+        sample_name="{}",
+        group_name="{}",
+    '''.format(regex, regex)
+    return constraints
+
+
 def makeSnakemakeAllRule(endpts, samples, groups):
     allRule = 'rule all:\n\tinput: config["final_inputs"]\n'
     return allRule
