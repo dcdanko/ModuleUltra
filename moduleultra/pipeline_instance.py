@@ -154,7 +154,7 @@ class PipelineInstance:
         preprocessed = initialImports()
         preprocessed += wildcardConstraints()
         preprocessed += '\nconfig={}\n\n'.format(confStr)  # add conf
-        #preprocessed += makeSnakemakeAllRule(endpts, samples, groups)
+        preprocessed += makeSnakemakeAllRule(endpts, samples, groups)
 
         # add individual results
         for resultSchema in self.resultSchema:
