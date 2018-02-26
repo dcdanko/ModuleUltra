@@ -20,7 +20,7 @@ def wildcardConstraints():
 
 
 def makeSnakemakeAllRule(endpts, samples, groups):
-    allRule = 'rule all:\n\tinput: inputsToAllRule\n'
+    allRule = 'rule all:\n\tinput: inputsToAllRule(config)\n'
     return allRule
 
 
