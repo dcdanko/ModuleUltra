@@ -1,14 +1,14 @@
 import datasuper as ds
 
 
-def inputsToAllRule(*args, **kwargs):
+def inputsToAllRule(wcs):
     '''Return a list of all final inputs based on a config.'''
     out = []
     for sampleName in config['samples'].keys():
-        for pattern in config['patterns']['sample']:
+        for pattern in config['final_inputs']['sample_patterns']:
             out.append(pattern.format(sample_name=sampleName))
     for groupName in config['groups'].keys():
-        for pattern in config['patterns']['group']:
+        for pattern in config['final_inputs']['group_patterns']:
             out.append(pattern.format(group_name=groupName))
     return out
 
