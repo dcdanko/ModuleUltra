@@ -5,6 +5,7 @@ from json import loads as jloads
 from .errors import *
 from .installation import *
 from shutil import rmtree
+from .utils import findFileInDirRecursively
 
 
 class ModuleUltraConfig:
@@ -129,7 +130,7 @@ class ModuleUltraConfig:
             snakeDir = os.path.join(pipeDir, snakeDir)
         except KeyError:
             snakeDir = pipeDir
-        snakeFile = os.path.join(snakeDir, fileName)
+        snakeFile = findFileInDirRecursively(snakeDir, fileName)
         return snakeFile
 
     def getSnakemakeConf(self, pipeName, version):
