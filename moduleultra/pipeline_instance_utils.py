@@ -5,6 +5,7 @@ import sys
 import os.path
 from inspect import getmembers
 
+
 def openJSONConf(confF):
     return json.loads(open(confF).read())
 
