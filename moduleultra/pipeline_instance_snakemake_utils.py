@@ -23,7 +23,7 @@ def makeSnakemakeAllRule(endpts, samples, groups):
     allRule = 'rule all:\n\tinput: config["final_inputs"]\n'
     return allRule
     ruleBldr = SnakemakeRuleBuilder('all')
-    ruleBldr.addInput("inputsToAllRule")
+    ruleBldr.addInput('inputsToAllRule')
     return str(ruleBldr)
 
 
@@ -38,12 +38,12 @@ def addFinalPatternsToConf(conf, endpts, samples, groups):
         pattern = schema.getOutputFilePattern()
         if schema.level == 'SAMPLE':
             allInps['sample_patterns'].append(pattern)
-            for sample in samples:
-                allInps['sample_names'].append(sample.name)
+            #for sample in samples:
+            #    allInps['sample_names'].append(sample.name)
         elif schema.level == 'GROUP':
             allInps['group_patterns'].append(pattern)
-            for group in groups:
-                allInps['group_names'].append(group.name)
+            #for group in groups:
+            #    allInps['group_names'].append(group.name)
         else:
             print(schema.level, file=sys.stderr)
             assert False
