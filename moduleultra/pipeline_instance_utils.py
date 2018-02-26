@@ -23,15 +23,15 @@ def preprocessSamplesAndGroups(samples, groups):
     '''
 
     dsRepo = ds.Repo.loadRepo()
-    if not groups:
+    if groups is None:
         groups = dsRepo.db.sampleGroupTable.getAll()
-        if not samples:
+        if samples is None:
             samples = dsRepo.db.sampleTable.getAll()
         else:
             samples = dsRepo.db.sampleTable.getMany(samples)
     else:
         groups = dsRepo.db.sampleGroupTable.getMany(groups)
-        if not samples:
+        if samples is None:
             samples = []
             for group in groups:
                 samples += group.allSamples()

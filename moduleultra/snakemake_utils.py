@@ -1,7 +1,7 @@
 import datasuper as ds
 
 
-def inputsToAllRule(config):
+def inputsToAllRule(*args, **kwargs):
     '''Return a list of all final inputs based on a config.'''
     out = []
     for sampleName in config['samples'].keys():
