@@ -20,27 +20,22 @@ def wildcardConstraints():
 
 
 def makeSnakemakeAllRule(endpts, samples, groups):
-    allRule = 'rule all:\n\tinput: inputsToAllRule(config)\n'
+    allRule = 'rule all:\n\tinput: config["final_inputs"]\n'
     return allRule
 
 
 def addFinalPatternsToConf(conf, endpts, samples, groups):
-    allInps = {'sample_patterns': [],
-               'group_patterns': [],
-               'sample_names': [],
-               'group_names': []}
+    allInps = []
     for schema in endpts:
         if schema.isOrigin():
             continue
         pattern = schema.getOutputFilePattern()
         if schema.level == 'SAMPLE':
-            allInps['sample_patterns'].append(pattern)
-            #for sample in samples:
-            #    allInps['sample_names'].append(sample.name)
+            for sample in samples:
+                allInps.append(pattern.format(sample_name=sample.name))
         elif schema.level == 'GROUP':
-            allInps['group_patterns'].append(pattern)
-            #for group in groups:
-            #    allInps['group_names'].append(group.name)
+            for group in groups:
+                allInps.append(pattern.format(group_name=group.name))
         else:
             print(schema.level, file=sys.stderr)
             assert False
