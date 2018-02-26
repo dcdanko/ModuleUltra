@@ -20,11 +20,8 @@ def wildcardConstraints():
 
 
 def makeSnakemakeAllRule(endpts, samples, groups):
-    allRule = 'rule all:\n\tinput: config["final_inputs"]\n'
+    allRule = 'rule all:\n\tinput: inputsToAllRule\n'
     return allRule
-    ruleBldr = SnakemakeRuleBuilder('all')
-    ruleBldr.addInput('inputsToAllRule')
-    return str(ruleBldr)
 
 
 def addFinalPatternsToConf(conf, endpts, samples, groups):
