@@ -8,9 +8,7 @@ from .pipeline_instance import PipelineInstance
 
 
 class ModuleUltraRepo:
-    '''
-    Represents a directory where moduleultra pipelines are run
-    '''
+    '''Represents a directory where moduleultra pipelines are run.'''
 
     repoDirName = '.module_ultra'
     resultDirName = 'core_results'
@@ -27,13 +25,20 @@ class ModuleUltraRepo:
         return ds.Repo.loadRepo()
 
     def addPipeline(self, pipelineName, version=None, modify=False):
-        '''
-        Add a pipeline that has already been installed
-        to this repo.
+        '''Add an installed pipeline to this repo.
 
-        Add relevant types to the datasuper repo.
-        Add the pipeline to the list of pipelines in the repo.
+        To do this:
+         - Add relevant types to the datasuper repo.
+         - Add the pipeline to the list of pipelines in the repo.
+
+        Args:
+            pipelineName (str): The name of the pipeline to add.
+            version (:obj:`str`, optional): Add a particular version
+                of the pipeline.
+            modify (:obj:`bool`, optional): If True modify any existing
+                version of the (pipeline, version). Can be used for updates.
         '''
+
         if not modify:
             if pipelineName in self.pipelines:
                 raise PipelineAlreadyInRepoError()
@@ -43,11 +48,11 @@ class ModuleUltraRepo:
         if version is None:
             version = pipelineDef["VERSION"]
 
-        self.addPipelineTypes(pipelineName, version, pipelineDef)    
-
+        self.addPipelineTypes(pipelineName, version, pipelineDef)
         self.pipelines[pipelineName] = version
 
     def addPipelineTypes(self, pipelineName, version, pipelineDef):
+        '''Add file, result, and sampe types from a pipeline.'''
         instance = PipelineInstance(self, pipelineName, version, pipelineDef)
         with ds.Repo.loadRepo() as dsRepo:
             for fileTypeName in instance.listFileTypes():
@@ -60,6 +65,7 @@ class ModuleUltraRepo:
                 dsRepo.addSampleType(sampleTypeName)
 
     def getPipelineInstance(self, pipelineName, version=None):
+        '''Return a pipeline instance for a pipeline that is in this repo.'''
         assert pipelineName in self.pipelines
         if version is not None:
             assert version == self.pipelines[pipelineName]
@@ -71,22 +77,16 @@ class ModuleUltraRepo:
         return PipelineInstance(self, pipelineName, version, pipelineDef)
 
     def listPipelines(self):
-        '''
-        List the names of pipelines that have been added to this repo
-        '''
+        '''Return a list of pipelines that have been added to this repo.'''
         return [p for p in self.pipelines.keys()]
 
     def snakemakeFilepath(self, pipelineName):
-        '''
-        Return the path to use for the snakemake file
-        '''
+        '''Return the path to use for a snakemake file for a pipeline.'''
         snakeFile = 'snakemake_{}.smk'.format(pipelineName)
         return os.path.join(self.abspath, snakeFile)
 
     def getResultDir(self):
-        '''
-        Get the directory where the actual result files are stored.
-        '''
+        '''Get the directory where the actual result files are stored.'''
         return os.path.join(self.abspath, ModuleUltraRepo.resultDirName)
 
     def makeVirtualSampleDir(self, dname, sample):
@@ -108,9 +108,7 @@ class ModuleUltraRepo:
 
     @staticmethod
     def repoDir(startDir='.'):
-        '''
-        returns the abspath for the .module_ultra directory
-        '''
+        '''Return the abspath to the first repo at or above `startDir`.'''
         if startDir == '.':
             startPath = os.getenv('PWD')
         else:
@@ -125,15 +123,18 @@ class ModuleUltraRepo:
 
     @staticmethod
     def loadRepo(startDir='.'):
+        '''Return the first repo at or above `startDir`.'''
         repoPath = ModuleUltraRepo.repoDir(startDir=startDir)
         return ModuleUltraRepo(repoPath)
 
     @staticmethod
     def initRepo(root='.'):
-        '''
-        Create a datasuper repo in the same root
-        Create a .module_ultra directory
-        Create a .module_ultra/core_results directory
+        '''Create a repo in `root` and return that repo.
+
+        To do this:
+            Create a datasuper repo in the same root
+            Create a .module_ultra directory
+            Create a .module_ultra/core_results directory
         '''
         try:
             ds.Repo.initRepo(targetDir=root)

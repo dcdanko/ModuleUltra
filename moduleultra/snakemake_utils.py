@@ -2,6 +2,7 @@ import datasuper as ds
 
 
 def inputsToAllRule(config):
+    '''Return a list of all final inputs based on a config.'''
     out = []
     for sampleName in config['samples'].keys():
         for pattern in config['patterns']['sample']:
@@ -13,11 +14,13 @@ def inputsToAllRule(config):
 
 
 def getSample(resultFilename):
+    '''Return the samplename based off a result filename.'''
     return resultFilename.split('/')[-1].split('.')[0]
 
 
 def getOriginResultFiles(config, resultType, fileType):
-    '''
+    '''Return a function that will in turn return paths to origins files.
+
     N.B. This function returns another function!
     It does not return the filepath itself
     '''
@@ -32,10 +35,14 @@ def getOriginResultFiles(config, resultType, fileType):
 
 
 def expandGroup(*samplePatterns, names=False):
-    '''
+    '''Return a function that returns all samples in a group.
+
+    If `names` is True return a list of sample name strings.
+
     N.B. This function returns another function!
     It does not return the filepaths themselves
     '''
+
     def getter(wcs):
         gname = wcs.group_name
         dsrepo = ds.Repo.loadRepo()

@@ -5,12 +5,16 @@ from json import loads as jloads
 from .errors import *
 from .installation import *
 from shutil import rmtree
+from .utils import findFileInDirRecursively
 
 
 class ModuleUltraConfig:
-    '''
-    This class represents the module ultra config
-    directory and lots of associated operations.
+    '''This class represents a module ultra config.
+
+    Currently the module ultra config can only be installed for
+    a user, once. No global or specific installations are currently
+    possible. As such this essentially a static class.
+
 
     Typically this directory is in $HOME/.module_ultra_config
     '''
@@ -34,8 +38,7 @@ class ModuleUltraConfig:
         return {k: v for k, v in self.installedPipes.items()}
 
     def getPipelineDefinition(self, pipelineName, version=None):
-        '''
-        Return the definition for the specified pipeline if installed.
+        '''Return the definition for the specified pipeline, if installed.
 
         If the version is not specified return the highest version number'
         '''
@@ -50,9 +53,11 @@ class ModuleUltraConfig:
         return pipeDef
 
     def setClusterSubmitScript(self, script):
+        '''Ser the abspath for the cluster_submit_script.'''
         self.configVars['CLUSTER_SUBMIT_SCRIPT'] = os.path.abspath(script)
 
     def clusterSubmitScript(self):
+        '''Return the abspath to the cluster submit script.'''
         try:
             cScript = self.configVars['CLUSTER_SUBMIT_SCRIPT']
             return cScript
@@ -60,13 +65,26 @@ class ModuleUltraConfig:
             return None
 
     def getInstalledPipelinesDir(self):
+        '''Return the abspath to the directory with installed pipelines.'''
         return os.path.join(self.abspath, ModuleUltraConfig.pipelineDirName)
 
     def installPipeline(self, uri, dev=False):
+        '''Install a new pipeline.'''
         installer = PipelineInstaller(self, uri, dev=dev)
         installer.install()
 
     def uninstallPipeline(self, pipeName, version=None):
+        '''Uninstall a pipeline.
+
+        To do this:
+            Find the directory where the pipeline is installed.
+            Delete it
+
+        Args:
+            pipeName (str): The name of the pipeline to be removed.
+            version (:obj:`str`, optional): Particular version to remove.
+        '''
+
         if version is None:
             version = getHighestVersion(self.installedPipes[pipeName])
 
@@ -79,11 +97,31 @@ class ModuleUltraConfig:
         del self.installedPipes[pipeName]
 
     def getPipelineDir(self, pipeName, version):
+        '''Return the abspath of the installation directory for a pipeline.
+
+        Args:
+            pipeName (str): The name of the pipeline to be removed.
+            version (:obj:`str`, optional): Particular version to remove.
+        '''
+
         vPipeName = joinPipelineNameVersion(pipeName, version)
         pipeDir = os.path.join(self.getInstalledPipelinesDir(), vPipeName)
         return pipeDir
 
     def getSnakefile(self, pipeName, version, fileName):
+        '''Return the abspath of a snakefile in a pipeline.
+
+        ModuleUltra uses snakemake to run tools, one file per module.
+        The names of these files are specified in each module (often
+        by default). This function returns the path to the file as installed
+        on the current system.
+
+        Args:
+            pipeName (str): The name of the pipeline.
+            version (str): Pipeline version.
+            fileName (str): The name of the snakefile.
+        '''
+
         pipeDir = self.getPipelineDir(pipeName, version)
         pipeDef = os.path.join(pipeDir, 'pipeline_definition.json')
         pipeDef = jloads(open(pipeDef).read())
@@ -92,10 +130,22 @@ class ModuleUltraConfig:
             snakeDir = os.path.join(pipeDir, snakeDir)
         except KeyError:
             snakeDir = pipeDir
-        snakeFile = os.path.join(snakeDir, fileName)
+        snakeFile = findFileInDirRecursively(snakeDir, fileName)
         return snakeFile
 
     def getSnakemakeConf(self, pipeName, version):
+        '''Return the abspath of a config file for a pipeline.
+
+        Most pipelines specify default config files. The paths
+        to these config files are specified in the pipeline
+        definition. This fucntion returns the abspath of the config
+        file.
+
+        Args:
+            pipeName (str): The name of the pipeline.
+            version (str): Pipeline version.
+        '''
+
         vPipeName = joinPipelineNameVersion(pipeName, version)
         pipeDir = os.path.join(self.getInstalledPipelinesDir(), vPipeName)
         pipeDef = os.path.join(pipeDir, 'pipeline_definition.json')
@@ -109,10 +159,7 @@ class ModuleUltraConfig:
 
     @classmethod
     def getConfigDir(ctype):
-        '''
-        Return the directory where the module ultra config is
-        stored
-        '''
+        '''Return the abspath to module_ultra_config directory.'''
         try:
             configRoot = os.environ['MODULE_ULTRA_CONFIG']
         except KeyError:
@@ -122,13 +169,12 @@ class ModuleUltraConfig:
 
     @classmethod
     def load(ctype):
-        '''
-        Get the config object
-        '''
+        '''Return the ModuleUltraConfig.'''
         return ModuleUltraConfig(ctype.getConfigDir())
 
     @classmethod
     def initConfig(ctype, dest=None):
+        '''Create the ModuleUltraConfig.'''
         try:
             os.mkdir(ctype.getConfigDir())
 

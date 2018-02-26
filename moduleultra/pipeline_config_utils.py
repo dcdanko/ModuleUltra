@@ -5,6 +5,7 @@ from sys import stderr
 
 
 def resolveCmd(cmd):
+    '''Return the stdout of a command. Runs command in the shell.'''
     try:
         cmdOut = check_output(cmd, shell=True)
         out = cmdOut.decode('utf-8').strip()
@@ -16,7 +17,8 @@ def resolveCmd(cmd):
 
 
 def fromPipelineDir(fpath):
-    '''
+    '''Return `fpath` from the directory of the pipeline.
+
     Works by assuming this function is being called
     directly from the conf. Could be pretty unstable
     but cool if it works.
