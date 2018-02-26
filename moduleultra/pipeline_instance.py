@@ -76,7 +76,7 @@ class PipelineInstance:
             if not samples:
                 samples = []
                 for group in groups:
-                    samples += group.samples()
+                    samples += group.allSamples()
             else:
                 samples = dsRepo.db.sampleTable.getMany(samples)
 
