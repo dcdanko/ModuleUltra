@@ -3,16 +3,14 @@ import datasuper as ds
 
 def inputsToAllRule(config):
     '''Return a function thats lists all final inputs based on a config.'''
-    def aller(wcs):
-        out = []
-        for sampleName in config['samples'].keys():
-            for pattern in config['final_inputs']['sample_patterns']:
-                out.append(pattern.format(sample_name=sampleName))
-        for groupName in config['groups'].keys():
-            for pattern in config['final_inputs']['group_patterns']:
-                out.append(pattern.format(group_name=groupName))
-        return out
-    return aller
+    out = []
+    for sampleName in config['samples'].keys():
+        for pattern in config['final_inputs']['sample_patterns']:
+            out.append(pattern.format(sample_name=sampleName))
+    for groupName in config['groups'].keys():
+        for pattern in config['final_inputs']['group_patterns']:
+            out.append(pattern.format(group_name=groupName))
+    return out
 
 
 def getSample(resultFilename):
