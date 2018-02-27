@@ -1,4 +1,5 @@
 import datasuper as ds
+from os.path import isfile
 
 
 def inputsToAllRule(config):
@@ -11,6 +12,7 @@ def inputsToAllRule(config):
         for groupName in config['groups'].keys():
             for pattern in config['final_inputs']['group_patterns']:
                 out.append(pattern.format(group_name=groupName))
+        out = [f for f in out if not isfile(f)]
         return out
     return aller
 
