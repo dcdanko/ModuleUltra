@@ -40,9 +40,7 @@ class PipelineInstance:
                                                   self.pipelineName,
                                                   self.pipelineVersion,
                                                   schema,
-                                                  origin=isOrigin
-                                                  )
-            )
+                                                  origin=isOrigin))
 
         self.origins = pipelineDef['ORIGINS']
         for schema in self.resultSchema:
