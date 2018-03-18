@@ -22,7 +22,7 @@ class ResultSchema:
         self.level = getOrDefault(schema, 'LEVEL', 'SAMPLE')
 
         self.snakeFilename = '{}.smk'.format(self.module)
-        if not self.isOrigin():
+        if not origin:
             self.snakeFilepath = self.muConfig.getSnakefile(self.pipelineName,
                                                             self.pipelineVersion,
                                                             self.snakeFilename)

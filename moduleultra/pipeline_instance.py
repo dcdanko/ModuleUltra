@@ -35,11 +35,12 @@ class PipelineInstance:
         self.origins = pipelineDef['ORIGINS']
         self.resultSchema = []
         for schema in pipelineDef['RESULT_TYPES']:
+            isOrigin = schema['NAME'] in self.origins
             self.resultSchema.append(ResultSchema(muRepo,
                                                   self.pipelineName,
                                                   self.pipelineVersion,
                                                   schema,
-                                                  origin=(schema in self.origins)
+                                                  origin=isOrigin
                                                   )
             )
 
