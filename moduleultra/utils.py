@@ -36,7 +36,7 @@ def findFileInDirRecursively(dirname, filename):
             out = findFileInDirRecursively(sub, filename)
             if out is not None:
                 return out
-    return None
+    assert False, f'Could not find {filename} in {dirname} or subdirs'
 
 
 def getHighestVersion(rawNums, cur=0, raw=True):
