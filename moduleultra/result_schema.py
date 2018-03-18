@@ -22,9 +22,10 @@ class ResultSchema:
         self.level = getOrDefault(schema, 'LEVEL', 'SAMPLE')
 
         self.snakeFilename = '{}.smk'.format(self.module)
-        self.snakeFilepath = self.muConfig.getSnakefile(self.pipelineName,
-                                                        self.pipelineVersion,
-                                                        self.snakeFilename)
+        if not self.isOrigin():
+            self.snakeFilepath = self.muConfig.getSnakefile(self.pipelineName,
+                                                            self.pipelineVersion,
+                                                            self.snakeFilename)
         self.files = {}
         files = schema['FILES']
         if type(files) == []:
