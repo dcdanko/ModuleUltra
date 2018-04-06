@@ -89,6 +89,10 @@ class ModuleUltraRepo:
         '''Get the directory where the actual result files are stored.'''
         return os.path.join(self.abspath, ModuleUltraRepo.resultDirName)
 
+    def makeTempDir(self):
+        '''Return a path to a temp dir within the result dir.'''
+        pass
+
     def makeVirtualSampleDir(self, dname, sample):
         '''
         Create a directory named <dname>
