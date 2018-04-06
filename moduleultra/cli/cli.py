@@ -106,6 +106,8 @@ def runPipe(pipeline, version, choose_endpts, choose_exclude_endpts, exclude_end
         pipeline = UserChoice('pipeline', repo.listPipelines()).resolve()
 
     pipe = repo.getPipelineInstance(pipeline, version=version)
+    print('Running {} :: {}'.format(pipe.pipelineName, pipe.pipelineVersion))
+
     dsRepo = repo.datasuperRepo()
 
     # select sets

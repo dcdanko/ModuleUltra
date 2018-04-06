@@ -184,6 +184,7 @@ class ResultSchema:
         snakefileStr = open(self.snakeFilepath).read()
         if self.isOrigin():
             snakefileStr = self.editOrigins(snakefileStr)
+        snakefileStr = self.addBenchmark(snakefileStr)
         snakefileStr += self.makeRegisterRule()
         return snakefileStr
 
@@ -196,6 +197,31 @@ class ResultSchema:
         elif self.level == 'GROUP':
             fpat = '{{group_name}}.{}.{}.{}'.format(self.module, fname, ext)
         return fpat
+
+    def addBenchmark(self, snakefileStr):
+        """Hack."""
+
+        ruleStrs = [ruleStr
+                    for ruleStr in snakefileStr.split('rule')
+                    if len(ruleStr.strip()) > 0]
+        
+        
+        
+        benched = []
+        for ruleStr in ruleStrs:
+            ruleName = ruleStr.split('\n')[0].split('rule')[-1].split(':')[0].strip()
+            splitTkn = 'run:'
+            if splitTkn not in ruleStr:
+                splitTkn = 'shell:'
+                if splitTkn not in ruleStr:
+                    benched.append(ruleStr)
+                    continue
+            benchStr = 'benchmark:\n\t\t"{{sample_name}}.{}.{}.timing"\n\t'.format(self.module, ruleName)
+            tkns = ruleStr.split(splitTkn)
+            out = 'rule' + tkns[0] + benchStr + splitTkn + tkns[1]  
+            benched.append(out)
+        out = ''.join(benched)
+        return out
 
     def editOrigins(self, snakefileStr):
         return snakefileStr
