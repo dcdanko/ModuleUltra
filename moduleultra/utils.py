@@ -33,9 +33,12 @@ def findFileInDirRecursively(dirname, filename):
                 for f in os.listdir(dirname)
                 if os.path.isdir(os.path.join(dirname, f))]
         for sub in subs:
-            out = findFileInDirRecursively(sub, filename)
-            if out is not None:
-                return out
+            try:
+                out = findFileInDirRecursively(sub, filename)
+                if out is not None:
+                    return out
+            except AssertionError:
+                pass
     assert False, f'Could not find {filename} in {dirname} or subdirs'
 
 
