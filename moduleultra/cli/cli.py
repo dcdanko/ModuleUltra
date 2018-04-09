@@ -101,7 +101,7 @@ def reinstallPipeline(name, uri, version=None, dev=False):
 @click.option('--dryrun/--wetrun', default=False)
 @click.option('--unlock/--no-unlock', default=False)
 @click.option('-j', '--jobs', default=1)
-def runPipe(pipeline, version, localConfigFile, choose_endpts, choose_exclude_endpts, exclude_endpts, choose, local, dryrun, unlock, jobs):
+def runPipe(pipeline, version, local_config, choose_endpts, choose_exclude_endpts, exclude_endpts, choose, local, dryrun, unlock, jobs):
     repo = ModuleUltraRepo.loadRepo()
     if pipeline is None:
         pipeline = UserChoice('pipeline', repo.listPipelines()).resolve()
@@ -143,7 +143,7 @@ def runPipe(pipeline, version, localConfigFile, choose_endpts, choose_exclude_en
     # run the pipeline
     pipe.run(endpts=endpts, excludeEndpts=excludedEndpts, groups=groups, samples=samples,
              dryrun=dryrun, unlock=unlock, local=local, jobs=jobs,
-             custom_config_file=localConfigFile)
+             custom_config_file=local_config)
 
 
 ###############################################################################
