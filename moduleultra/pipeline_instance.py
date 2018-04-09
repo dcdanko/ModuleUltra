@@ -57,7 +57,8 @@ class PipelineInstance:
 
     def run(self,
             endpts=None, excludeEndpts=None, groups=None, samples=None,
-            dryrun=False, unlock=False, jobs=1, local=False):
+            dryrun=False, unlock=False, jobs=1, local=False,
+            custom_config_file=None):
         '''Run this pipeline.
 
         To do this:
@@ -91,10 +92,13 @@ class PipelineInstance:
         '''
         samples, groups = preprocessSamplesAndGroups(samples, groups)
         endpts = self.preprocessEndpoints(endpts, excludeEndpts)
-        preprocessedConf = self.preprocessConf(self.origins,
-                                               samples,
-                                               groups,
-                                               endpts)
+        preprocessedConf = self.preprocessConf(
+            self.origins,
+            samples,
+            groups,
+            endpts,
+            custom_config_file=custom_config_file
+        )
         snakefile = self.preprocessSnakemake(preprocessedConf,
                                              endpts,
                                              samples,
@@ -172,15 +176,14 @@ class PipelineInstance:
             sf.write(preprocessed)
         return sfile
 
-    def preprocessConf(self, origins, samples, groups, endpts):
+    def preprocessConf(self, origins, samples, groups, endpts,
+                       custom_config_file=None):
         '''Make a config object and return a JSON str of that object.'''
-        confF = self.snakemakeConf
-        ext = confF.split('.')[-1]
-        if ext == 'json':
-            pconf = openJSONConf(confF)
-        elif ext == 'py':
-            pconf = openPythonConf(confF)
-        pconf = runBackticks(pconf)
+        pconf = openConfF(self.snakemakeConf)
+        if custom_config_file:
+            customConf = openConfF(custom_config_file)
+            pconf = mergeConfs(customConf, pconf)
+
         for resultSchema in self.resultSchema:
             if resultSchema in endpts:
                 resultSchema.preprocessConf(pconf)

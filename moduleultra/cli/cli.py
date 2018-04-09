@@ -92,6 +92,7 @@ def reinstallPipeline(name, uri, version=None, dev=False):
 @main.command(name='run')
 @click.option('-p', '--pipeline', default=None, type=str)
 @click.option('-v', '--version', default=None, type=str)
+@click.option('-c', '--local-config', default=None, type=str)
 @click.option('--choose-endpts/--all-endpts', default=False)
 @click.option('--choose-exclude-endpts/--no-exclude-endpts', default=False)
 @click.option('--exclude-endpts', default='', type=str, help='list of comma-separated names')
@@ -100,7 +101,7 @@ def reinstallPipeline(name, uri, version=None, dev=False):
 @click.option('--dryrun/--wetrun', default=False)
 @click.option('--unlock/--no-unlock', default=False)
 @click.option('-j', '--jobs', default=1)
-def runPipe(pipeline, version, choose_endpts, choose_exclude_endpts, exclude_endpts, choose, local, dryrun, unlock, jobs):
+def runPipe(pipeline, version, localConfigFile, choose_endpts, choose_exclude_endpts, exclude_endpts, choose, local, dryrun, unlock, jobs):
     repo = ModuleUltraRepo.loadRepo()
     if pipeline is None:
         pipeline = UserChoice('pipeline', repo.listPipelines()).resolve()
@@ -141,7 +142,8 @@ def runPipe(pipeline, version, choose_endpts, choose_exclude_endpts, exclude_end
 
     # run the pipeline
     pipe.run(endpts=endpts, excludeEndpts=excludedEndpts, groups=groups, samples=samples,
-             dryrun=dryrun, unlock=unlock, local=local, jobs=jobs)
+             dryrun=dryrun, unlock=unlock, local=local, jobs=jobs,
+             custom_config_file=localConfigFile)
 
 
 ###############################################################################

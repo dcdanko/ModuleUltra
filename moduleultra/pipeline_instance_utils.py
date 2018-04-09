@@ -7,6 +7,28 @@ from inspect import getmembers
 import datasuper as ds
 
 
+def mergeConfs(priority, base):
+    out = {}
+    for k, v in base.items():
+        if k not in priority:
+            out[k] = v
+        else:
+            if type(v) == dict:
+                out[k] = mergeConfs(priority[k], base[k])
+            else:
+                out[k] = priority[k]
+    return out
+
+
+def openConfF(confF):
+    ext = confF.split('.')[-1]
+    if ext == 'json':
+        pconf = openJSONConf(confF)
+    elif ext == 'py':
+        pconf = openPythonConf(confF)
+    pconf = runBackticks(pconf)
+    return pconf
+
 
 def openJSONConf(confF):
     '''Read a JSON file and return the deserialized object.'''
