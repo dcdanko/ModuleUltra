@@ -19,6 +19,19 @@ def wildcardConstraints():
     return constraints
 
 
+def makeDirBuilder():
+    return '''
+    
+    import os
+
+    for sname in config['samples'].keys():
+        os.makedirs(sname, exist_ok=True)
+
+    for gname in config['groups'].keys():
+        os.makedirs(sname, exist_ok=True)
+    '''
+
+
 def makeSnakemakeAllRule(endpts, samples, groups):
     allRule = 'rule all:\n\tinput: inputsToAllRule(config)\n'
     return allRule

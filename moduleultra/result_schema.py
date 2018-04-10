@@ -193,9 +193,9 @@ class ResultSchema:
 
     def _makeFilePattern(self, fname, ext):
         if self.level == 'SAMPLE':
-            fpat = '{{sample_name}}.{}.{}.{}'.format(self.module, fname, ext)
+            fpat = '{{sample_name}}/{{sample_name}}.{}.{}.{}'.format(self.module, fname, ext)
         elif self.level == 'GROUP':
-            fpat = '{{group_name}}.{}.{}.{}'.format(self.module, fname, ext)
+            fpat = '{{group_name}}/{{group_name}}.{}.{}.{}'.format(self.module, fname, ext)
         return fpat
 
     def addBenchmark(self, snakefileStr):
