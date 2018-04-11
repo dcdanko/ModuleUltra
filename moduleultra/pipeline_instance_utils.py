@@ -35,7 +35,7 @@ def openJSONConf(confF):
     return json.loads(open(confF).read())
 
 
-def preprocessSamplesAndGroups(samples, groups):
+def preprocessSamplesAndGroups(origins, samples, groups):
     '''Return the appropriate list of samples and groups.
 
     If `groups` is None return a list of all available groups.
@@ -60,7 +60,18 @@ def preprocessSamplesAndGroups(samples, groups):
                 samples += group.allSamples()
         else:
             samples = dsRepo.db.sampleTable.getMany(samples)
-    return samples, groups
+
+    filteredSamples = []
+    for sample in samples:
+        rtypes = {result.resultType() for result in sample.results()}
+        keep = True
+        for origin in origins:
+            if origin not in rtypes:
+                keep = False
+        if keep:
+            filteredSamples.append(sample)
+
+    return filteredSamples, groups
 
 
 def openPythonConf(confF):

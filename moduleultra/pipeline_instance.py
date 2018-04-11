@@ -90,7 +90,8 @@ class PipelineInstance:
             local (:obj:`bool`, optional): Run all jobs on the local machine.
                 Defaults to False.
         '''
-        samples, groups = preprocessSamplesAndGroups(samples, groups)
+        samples, groups = preprocessSamplesAndGroups(self.origins,
+                                                     samples, groups)
         endpts = self.preprocessEndpoints(endpts, excludeEndpts)
         preprocessedConf = self.preprocessConf(
             self.origins,
