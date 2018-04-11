@@ -57,17 +57,11 @@ class ResultSchema:
                 for fname, fpath in input.items():
                     name = os.path.basename(fpath)
                     abspath = os.path.abspath(fpath)
-                    print('FPATH: ' + fpath, file=sys.stderr)
-                    print('ABSPATH: ' + abspath, file=sys.stderr)
+
                     fileType = params[fname]
                     fileRec = ds.getOrMakeFile(dsrepo, name, fpath, fileType)
-                    print('FILEREC: ' + str(fileRec.to_dict()), file=sys.stderr)
-                    #fileRec = ds.FileRecord(dsrepo, name=name, filepath=abspath, file_type=fileType)
-                    #print('[DataSuper] Saving File: {}'.format(fileRec), file=sys.stderr)
-                    #try:
-                    #    fileRec.save()
-                    #except ds.database.RecordExistsError as ree:
-                    #    print('[DataSuper] File Record already exists, this is usually ok but the error is reproduced below: {}'.format(ree), file=sys.stderr)
+                    print('[DataSuper] FILEREC: ' + str(fileRec), file=sys.stderr)
+
                     fileRecs[fname] = name
 
                 result = ds.ResultRecord(dsrepo,
