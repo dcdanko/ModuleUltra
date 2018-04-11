@@ -71,7 +71,17 @@ def preprocessSamplesAndGroups(origins, samples, groups):
         if keep:
             filteredSamples.append(sample)
 
-    return filteredSamples, groups
+    sampleSet = {sample.name for sample in filteredSamples}
+    filteredGroups = []
+    for group in groups:
+        keep = True
+        for sample in group.allSamples():
+            if sample not in sampleSet:
+                keep = False
+        if keep:
+            filteredGroups.append(group)
+
+    return filteredSamples, filteredGroups
 
 
 def openPythonConf(confF):
