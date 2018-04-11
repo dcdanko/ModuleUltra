@@ -58,6 +58,8 @@ class ResultSchema:
                     name = os.path.basename(fpath)
                     abspath = os.path.abspath(fpath)
 
+                    print('[DataSuper] FPATH: ' + fpath, file=sys.stderr)
+                    print('[DataSuper] ABSPATH: ' + abspath, file=sys.stderr)
                     fileType = params[fname]
                     fileRec = ds.getOrMakeFile(dsrepo, name, fpath, fileType)
                     print('[DataSuper] FILEREC: ' + str(fileRec), file=sys.stderr)
