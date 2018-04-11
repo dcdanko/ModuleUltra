@@ -58,7 +58,7 @@ class ResultSchema:
                     name = os.path.basename(fpath)
                     abspath = os.path.abspath(fpath)
                     print(fpath, file=sys.stderr)
-                    print(abspath, file=stderr)
+                    print(abspath, file=sys.stderr)
                     fileType = params[fname]
                     fileRec = ds.FileRecord(dsrepo, name=name, filepath=abspath, file_type=fileType)
                     print('[DataSuper] Saving File: {}'.format(fileRec), file=sys.stderr)
