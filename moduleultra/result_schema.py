@@ -61,6 +61,7 @@ class ResultSchema:
                     print('ABSPATH: ' + abspath, file=sys.stderr)
                     fileType = params[fname]
                     fileRec = ds.getOrMakeFile(dsrepo, name, fpath, fileType)
+                    print('FILEREC: ' + str(fileRec.to_dict()), file=sys.stderr)
                     #fileRec = ds.FileRecord(dsrepo, name=name, filepath=abspath, file_type=fileType)
                     #print('[DataSuper] Saving File: {}'.format(fileRec), file=sys.stderr)
                     #try:
