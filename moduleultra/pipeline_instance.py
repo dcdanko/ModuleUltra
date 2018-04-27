@@ -184,6 +184,7 @@ class PipelineInstance:
         if custom_config_file:
             customConf = openConfF(custom_config_file)
             pconf = mergeConfs(customConf, pconf)
+        pconf = runBackticks(pconf)
 
         for resultSchema in self.resultSchema:
             if resultSchema in endpts:

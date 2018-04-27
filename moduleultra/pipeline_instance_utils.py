@@ -26,7 +26,6 @@ def openConfF(confF):
         pconf = openJSONConf(confF)
     elif ext == 'py':
         pconf = openPythonConf(confF)
-    pconf = runBackticks(pconf)
     return pconf
 
 
@@ -165,7 +164,7 @@ def runBackticks(obj):
             else:
                 out += c
         return out
-    elif type(obj) == int:
+    elif type(obj) in [int, float]:
         return str(obj)
     else:
         print(type(obj), file=sys.stderr)
