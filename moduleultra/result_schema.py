@@ -7,12 +7,14 @@ from .utils import *
 
 class ResultSchema:
 
-    def __init__(self, muRepo, pipeName, pipeVersion, schema, origin=False):
+    def __init__(self, muRepo, pipeName, pipeVersion, schema,
+                 origin=False, benchmark=False):
         self.muRepo = muRepo
         self.muConfig = self.muRepo.muConfig
         self.pipelineName = pipeName
         self.pipelineVersion = pipeVersion
         self.origin = origin
+        self.benchmark = benchmark
 
         # this is the name of the result type in datasuper as well
         self.name = schema['NAME']
@@ -20,6 +22,8 @@ class ResultSchema:
         self.dependencies = getOrDefault(schema, 'DEPENDENCIES', [])
         self.module = getOrDefault(schema, 'MODULE', self.name)
         self.level = getOrDefault(schema, 'LEVEL', 'SAMPLE')
+        self.options = getOrDefault(schema, 'OPTIONS', [])
+        self.no_register = 'NO_REGISTER' in self.options
 
         self.snakeFilename = '{}.smk'.format(self.module)
         if not origin:
@@ -184,8 +188,10 @@ class ResultSchema:
         snakefileStr = open(self.snakeFilepath).read()
         if self.isOrigin():
             snakefileStr = self.editOrigins(snakefileStr)
-        snakefileStr = self.addBenchmark(snakefileStr)
-        snakefileStr += self.makeRegisterRule()
+        if self.benchmark:
+            snakefileStr = self.addBenchmark(snakefileStr)
+        if not self.no_register:
+            snakefileStr += self.makeRegisterRule()
         return snakefileStr
 
     def isOrigin(self):
