@@ -56,7 +56,7 @@ class ResultSchema:
             ruleBldr.addParam(fname, ftype)
 
         runStr = '''
-            with ds.Repo.loadRepo() as dsrepo:
+            with global_master_datasuper_repo as dsrepo:
                 fileRecs = {}
                 for fname, fpath in input.items():
                     name = os.path.basename(fpath)
