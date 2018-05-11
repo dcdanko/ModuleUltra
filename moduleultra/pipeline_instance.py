@@ -57,7 +57,7 @@ class PipelineInstance:
 
     def run(self,
             endpts=None, excludeEndpts=None, groups=None, samples=None,
-            dryrun=False, unlock=False, jobs=1, local=False,
+            dryrun=False, reason=True, unlock=False, jobs=1, local=False,
             custom_config_file=None):
         '''Run this pipeline.
 
@@ -114,6 +114,7 @@ class PipelineInstance:
                   keepgoing=True,
                   printshellcmds=True,
                   dryrun=dryrun,
+                  printreason=reason,
                   unlock=unlock,
                   force_incomplete=True,
                   latency_wait=100,

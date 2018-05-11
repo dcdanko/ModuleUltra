@@ -202,7 +202,7 @@ class ResultSchema:
         """Hack."""
 
         ruleStrs = [ruleStr
-                    for ruleStr in snakefileStr.split('rule')
+                    for ruleStr in snakefileStr.split('rule ')
                     if len(ruleStr.strip()) > 0]
         
         
@@ -218,7 +218,7 @@ class ResultSchema:
                     continue
             benchStr = 'benchmark:\n\t\t"{{sample_name}}.{}.{}.timing"\n\t'.format(self.module, ruleName)
             tkns = ruleStr.split(splitTkn)
-            out = 'rule' + tkns[0] + benchStr + splitTkn + tkns[1]  
+            out = 'rule ' + tkns[0] + benchStr + splitTkn + tkns[1]  
             benched.append(out)
         out = ''.join(benched)
         return out
