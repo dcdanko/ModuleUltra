@@ -52,14 +52,15 @@ class ModuleUltraRepo:
         self.pipelines[pipelineName] = version
 
     def addPipelineTypes(self, pipelineName, version, pipelineDef):
-        '''Add file, result, and sampe types from a pipeline.'''
+        '''Add file, result, and sample types from a pipeline.'''
         instance = PipelineInstance(self, pipelineName, version, pipelineDef)
         with ds.Repo.loadRepo() as dsRepo:
             for fileTypeName in instance.listFileTypes():
                 dsRepo.addFileType(fileTypeName)
 
             for schema in instance.listResultSchema():
-                dsRepo.addResultSchema(schema.name, schema.files)
+                if not schema.no_register:
+                    dsRepo.addResultSchema(schema.name, schema.files)
 
             for sampleTypeName in instance.listSampleTypes():
                 dsRepo.addSampleType(sampleTypeName)
