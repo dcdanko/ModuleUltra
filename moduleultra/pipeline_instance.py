@@ -9,6 +9,7 @@ from .snakemake_rule_builder import SnakemakeRuleBuilder
 from time import time
 from .pipeline_instance_utils import *
 from .pipeline_instance_snakemake_utils import *
+from .snakemake_log_handler import CompactMultiProgressBars
 
 
 class PipelineInstance:
@@ -107,18 +108,25 @@ class PipelineInstance:
         clusterScript = self.getClusterSubmitScript(local)
         snkmkJobnameTemplate = self.getSnakemakeJobnameTemplate()
 
-        snakemake(snakefile,
-                  config={},
-                  workdir=self.muRepo.getResultDir(),
-                  cluster=clusterScript,
-                  keepgoing=True,
-                  printshellcmds=True,
-                  dryrun=dryrun,
-                  unlock=unlock,
-                  force_incomplete=True,
-                  latency_wait=100,
-                  jobname=snkmkJobnameTemplate,
-                  nodes=jobs)
+        loghandler = None
+        if not dryrun:
+            loghandler = CompactMultiProgressBars().handle_msg
+
+        snakemake(
+            snakefile,
+            config={},
+            workdir=self.muRepo.getResultDir(),
+            cluster=clusterScript,
+            keepgoing=True,
+            printshellcmds=True,
+            dryrun=dryrun,
+            unlock=unlock,
+            force_incomplete=True,
+            latency_wait=100,
+            jobname=snkmkJobnameTemplate,
+            nodes=jobs,
+            log_handler=loghandler
+        )
 
     def getSnakemakeJobnameTemplate(self):
         '''Return a jobname template based on this pipeline instance.'''
