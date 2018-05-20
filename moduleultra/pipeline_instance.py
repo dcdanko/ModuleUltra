@@ -60,7 +60,7 @@ class PipelineInstance:
     def run(self,
             endpts=None, excludeEndpts=None, groups=None, samples=None,
             dryrun=False, reason=True, unlock=False, jobs=1, local=False,
-            custom_config_file=None):
+            custom_config_file=None, compact_logger=False):
         '''Run this pipeline.
 
         To do this:
@@ -110,7 +110,7 @@ class PipelineInstance:
         snkmkJobnameTemplate = self.getSnakemakeJobnameTemplate()
 
         loghandler = None
-        if not dryrun:
+        if compact_logger:
             name = f'{getcwd()} :: {self.pipelineName} :: {self.pipelineVersion}'
             loghandler = CompactMultiProgressBars(name=name).handle_msg
 
