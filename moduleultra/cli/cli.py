@@ -101,8 +101,11 @@ def reinstallPipeline(name, uri, version=None, dev=False):
 @click.option('--dryrun/--wetrun', default=False)
 @click.option('--unlock/--no-unlock', default=False)
 @click.option('--compact/--logger', default=False)
+@click.option('--benchmark/--no-benchmark', default=False)
 @click.option('-j', '--jobs', default=1)
-def runPipe(pipeline, version, local_config, choose_endpts, choose_exclude_endpts, exclude_endpts, choose, local, dryrun, unlock, compact, jobs):
+def runPipe(pipeline, version, local_config,
+            choose_endpts, choose_exclude_endpts, exclude_endpts, choose,
+            local, dryrun, unlock, compact, benchmark, jobs):
     repo = ModuleUltraRepo.loadRepo()
     if pipeline is None:
         pipeline = UserChoice('pipeline', repo.listPipelines()).resolve()
@@ -117,7 +120,7 @@ def runPipe(pipeline, version, local_config, choose_endpts, choose_exclude_endpt
     if choose_endpts:
         endpts = UserMultiChoice('What end points should be evaluated?',
                                  pipe.listEndpoints()).resolve()
-    
+
     excludedEndpts = exclude_endpts.split(',')
     if choose_exclude_endpts:
         excludedEndpts = UserMultiChoice('What end points should NOT be evaluated?',
@@ -142,9 +145,11 @@ def runPipe(pipeline, version, local_config, choose_endpts, choose_exclude_endpt
                                   display=lambda x: x.name).resolve()
 
     # run the pipeline
-    pipe.run(endpts=endpts, excludeEndpts=excludedEndpts, groups=groups, samples=samples,
-             dryrun=dryrun, unlock=unlock, local=local, jobs=jobs,
-             custom_config_file=local_config, compact_logger=compact)
+    pipe.run(endpts=endpts, excludeEndpts=excludedEndpts,
+             groups=groups, samples=samples, dryrun=dryrun,
+             unlock=unlock, local=local, jobs=jobs,
+             custom_config_file=local_config, compact_logger=compact,
+             benchmark=benchmark)
 
 
 ###############################################################################
