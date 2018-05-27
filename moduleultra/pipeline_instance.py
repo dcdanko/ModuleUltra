@@ -67,7 +67,7 @@ class PipelineInstance:
     def run(self,
             endpts=None, excludeEndpts=None, groups=None, samples=None,
             dryrun=False, reason=True, unlock=False, jobs=1, local=False,
-            custom_config_file=None):
+            custom_config_file=None, compact_logger=False, benchmark=False):
         '''Run this pipeline.
 
         To do this:
@@ -99,6 +99,9 @@ class PipelineInstance:
             local (:obj:`bool`, optional): Run all jobs on the local machine.
                 Defaults to False.
         '''
+        if benchmark:
+            for schema in self.resultSchema:
+                schema.benchmark = True
         samples, groups = preprocessSamplesAndGroups(self.origins,
                                                      samples, groups)
         endpts = self.preprocessEndpoints(endpts, excludeEndpts)
@@ -117,7 +120,7 @@ class PipelineInstance:
         snkmkJobnameTemplate = self.getSnakemakeJobnameTemplate()
 
         loghandler = None
-        if not dryrun:
+        if compact_logger:
             name = f'{getcwd()} :: {self.pipelineName} :: {self.pipelineVersion}'
             loghandler = CompactMultiProgressBars(name=name).handle_msg
 
