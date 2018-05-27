@@ -75,16 +75,23 @@ def addDataToSnakemakeConf(conf, samples, groups):
 
 
 def addOriginsToSnakemakeConf(conf, origins, samples, groups):
-    originConf = {origin: {} for origin in origins}
+    flat_origins = []
+    for origin_group in origins:
+        if type(origin_group) == str:
+            origin_group = [origin_group]
+        for origin in origin_group:
+            flat_origins.append(origin)
+
+    originConf = {origin: {} for origin in flat_origins}
 
     for sample in samples:
-        for result in sample.results(resultTypes=origins):
+        for result in sample.results(resultTypes=flat_origins):
             recs = {}
             for fileRecName, fileRec in result.files():
                 recs[fileRecName] = fileRec.filepath()
             originConf[result.resultType()][sample.name] = recs
     for group in groups:
-        for result in group.allResults(resultTypes=origins):
+        for result in group.allResults(resultTypes=flat_origins):
             recs = {}
             for fileRecName, fileRec in result.files():
                 recs[fileRecName] = fileRec.filepath()

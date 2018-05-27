@@ -25,7 +25,7 @@ class ResultSchema:
         self.options = getOrDefault(schema, 'OPTIONS', [])
         self.no_register = 'NO_REGISTER' in self.options
 
-        self.snakeFilename = '{}.smk'.format(self.module)
+        self.snakeFilename = getOrDefault(schema, 'SNAKEMAKE', '{}.smk'.format(self.module))
         if not origin:
             self.snakeFilepath = self.muConfig.getSnakefile(self.pipelineName,
                                                             self.pipelineVersion,

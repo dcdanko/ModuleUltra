@@ -35,9 +35,16 @@ class PipelineInstance:
         self.sampleTypes = pipelineDef['SAMPLE_TYPES']
 
         self.origins = pipelineDef['ORIGINS']
+        self.flatOrigins = []
+        for origin_group in self.origins:
+            if type(origin_group) == str:
+                origin_group = [origin_group]
+            for origin in origin_group:
+                self.flatOrigins.append(origin)
+
         self.resultSchema = []
         for schema in pipelineDef['RESULT_TYPES']:
-            isOrigin = schema['NAME'] in self.origins
+            isOrigin = schema['NAME'] in self.flatOrigins
             self.resultSchema.append(ResultSchema(muRepo,
                                                   self.pipelineName,
                                                   self.pipelineVersion,

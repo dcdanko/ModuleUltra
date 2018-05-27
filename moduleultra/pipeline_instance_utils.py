@@ -64,8 +64,14 @@ def preprocessSamplesAndGroups(origins, samples, groups):
     for sample in samples:
         rtypes = {result.resultType() for result in sample.results()}
         keep = True
-        for origin in origins:
-            if origin not in rtypes:
+        for origin_group in origins:
+            if type(origin_group) == str:
+                origin_group = [origin_group]
+            has_group = False
+            for origin in origin_group:
+                if origin in rtypes:
+                    has_group = True
+            if not has_group:
                 keep = False
         if keep:
             filteredSamples.append(sample)
