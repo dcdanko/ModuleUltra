@@ -47,15 +47,15 @@ def getHighestVersion(rawNums, cur=0, raw=True):
         return rawNums[0]
     if raw:
         nums = []
-        for rawNum in nums:
+        for rawNum in rawNums:
             nums.append([int(el) for el in rawNum.split('.')])
     else:
         nums = rawNums
 
-    nums = sorted([int(el) for el in nums], reverse=True, key=lambda x: x[cur])
+    nums = sorted(nums, reverse=True, key=lambda x: x[cur])
 
-    if nums[0] > nums[1]:
-        return '.'.join(nums[0])
+    if nums[0][cur] > nums[1][cur]:
+        return '.'.join([str(el) for el in nums[0]])
 
     i = 1
     while nums[i][cur] == nums[0][cur]:

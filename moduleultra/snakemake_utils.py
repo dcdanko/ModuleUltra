@@ -31,12 +31,9 @@ def getOriginResultFiles(config, resultType, fileType):
 
     def getter(wcs):
         try:
-            try:
-                return config['origins'][resultType][wcs.sample_name][fileType]
-            except AttributeError:
-                return config['origins'][resultType][wcs.group_name][fileType]
-        except KeyError:
-            return str(hash('foobarbizzbazz'))
+            return config['origins'][resultType][wcs.sample_name][fileType]
+        except AttributeError:
+            return config['origins'][resultType][wcs.group_name][fileType]
             
     return getter
 
