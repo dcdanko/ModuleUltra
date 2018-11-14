@@ -1,6 +1,9 @@
-snakemake==4.1.0
-click==6.7
-yaml-backed-structs==0.9.0
--e git+git@github.com:dcdanko/gimme_input.git
--e git+git@github.com:dcdanko/DataSuper.git
--e git+git@github.com:dcdanko/PackageMega.git
+--index-url https://pypi.python.org/simple
+
+twine==1.12.1
+wheel==0.29.0
+tox==2.3.1
+
+
+--process-dependency-links
+-e .
