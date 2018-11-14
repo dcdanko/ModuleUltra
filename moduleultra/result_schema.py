@@ -210,9 +210,7 @@ class ResultSchema:
         ruleStrs = [ruleStr
                     for ruleStr in snakefileStr.split('rule ')
                     if len(ruleStr.strip()) > 0]
-        
-        
-        
+
         benched = []
         for ruleStr in ruleStrs:
             ruleName = ruleStr.split('\n')[0].split('rule')[-1].split(':')[0].strip()
@@ -224,7 +222,7 @@ class ResultSchema:
                     continue
             benchStr = 'benchmark:\n\t\t"{{sample_name}}.{}.{}.timing"\n\t'.format(self.module, ruleName)
             tkns = ruleStr.split(splitTkn)
-            out = 'rule ' + tkns[0] + benchStr + splitTkn + tkns[1]  
+            out = 'rule ' + tkns[0] + benchStr + splitTkn + tkns[1]
             benched.append(out)
         out = ''.join(benched)
         return out
