@@ -13,8 +13,15 @@ jobs:
       - checkout
 
       - run:
+          name: Lint code (non-fatal)
+          command: |
+            set +e
+            tox -e flake8,pylint
+            exit 0
+
+      - run:
           name: Run tox
-          command: tox
+          command: tox -e py35,py36
 
   publish:
     docker:
