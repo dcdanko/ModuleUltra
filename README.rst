@@ -1,9 +1,21 @@
 ModuleUltra
-=========
+===========
+
+.. image:: https://img.shields.io/circleci/project/github/dcdanko/ModuleUltra/master.svg
+    :alt: CircleCI master
 
 .. image:: https://img.shields.io/pypi/v/ModuleUltra.svg
     :target: https://pypi.python.org/pypi/ModuleUltra
     :alt: Latest PyPI version
+
+.. image:: https://img.shields.io/pypi/pyversions/ModuleUltra.svg
+    :alt: PyPI - Python version
+
+.. image:: https://img.shields.io/pypi/dm/ModuleUltra.svg
+    :alt: PyPI - Downloads
+
+.. image:: https://img.shields.io/github/license/dcdanko/ModuleUltra.svg
+    :alt: Github license
 
 Easy to use pipelines for large biological datasets.
 

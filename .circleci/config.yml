@@ -1,0 +1,93 @@
+version: 2
+
+jobs:
+  test:
+    docker:
+      - image: themattrix/tox
+
+    steps:
+      - run:
+          name: Install Git
+          command: apt-get update && apt-get install -y git ssh
+
+      - checkout
+
+      - run:
+          name: Lint code (non-fatal)
+          command: |
+            set +e
+            tox -e flake8,pylint
+            exit 0
+
+      - run:
+          name: Run tox
+          command: tox -e py35,py36
+
+  publish:
+    docker:
+      - image: circleci/python:3.6
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
+            - v1-dependency-cache-
+
+      - run:
+          name: Install requirements
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+
+      - save_cache:
+          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
+          paths:
+            - "venv"
+
+      - run:
+          name: Verify git tag vs. version
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            python setup.py verify
+
+      - run:
+          name: Init .pypirc
+          command: |
+            echo -e "[pypi]" >> ~/.pypirc
+            echo -e "username = $PYPI_USERNAME" >> ~/.pypirc
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+
+      - run:
+          name: Create packages
+          command: |
+            python setup.py sdist
+            python setup.py bdist_wheel
+
+      - run:
+          name: Upload to pypi
+          command: |
+            . venv/bin/activate
+            twine upload dist/*
+
+workflows:
+  version: 2
+
+  cli_cd:
+    jobs:
+      - test:
+          filters:  # required since `publish` has tag filters AND requires `test`
+            tags:
+              only: /.*/
+      - publish:
+          context: pypi
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+          requires:
+            - test

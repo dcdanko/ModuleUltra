@@ -65,13 +65,12 @@ class CompactProgressBar:
             spacer = (job_width - len(self.rulename)) * ' '
             display_rulename = self.rulename + spacer
 
-        assert len(display_rulename) == job_width, f'actual {len(display_rulename)} desired {job_width}' 
+        assert len(display_rulename) == job_width, f'actual {len(display_rulename)} desired {job_width}'
         out = display_rulename + nums + self.term.normal
         nspecial_chars = 3
         assert len(out) == (self.width + nspecial_chars), f'actual {len(out)} desired {self.width}'
         return out
 
-    
 
 class CompactMultiProgressBars:
 
@@ -111,7 +110,7 @@ class CompactMultiProgressBars:
         self.lock.acquire()
         self._handle_msg(msg)
         self.lock.release()
-            
+
     def _handle_msg(self, msg):
         """Send a logger message to the appropriate function."""
         level = msg['level']
@@ -127,10 +126,10 @@ class CompactMultiProgressBars:
             self.update()
 
     def handle_progress(self, msg):
-        return 
+        return
         done = msg['done']
         self.master_progress.done = done
-            
+
     def handle_run_info(self, msg):
         """Grab initial job counts, otherwise do nothing."""
         msg = msg['msg']
@@ -147,7 +146,7 @@ class CompactMultiProgressBars:
             total += count
             self.progress_bars[rulename] = CompactProgressBar(
                 rulename, count, self.term)
-        self.master_progress = ProgressBar('Jobs', total, self.term)        
+        self.master_progress = ProgressBar('Jobs', total, self.term)
         print(self.term.clear)
 
     def handle_job_info(self, msg):

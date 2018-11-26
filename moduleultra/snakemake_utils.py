@@ -34,7 +34,7 @@ def getOriginResultFiles(config, resultType, fileType):
             return config['origins'][resultType][wcs.sample_name][fileType]
         except AttributeError:
             return config['origins'][resultType][wcs.group_name][fileType]
-            
+
     return getter
 
 
@@ -63,4 +63,3 @@ def expandGroup(*samplePatterns, names=False):
         return patterns
 
     return getter
-

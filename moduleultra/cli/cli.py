@@ -1,9 +1,20 @@
-import click
+"""CLI command definitions."""
+
+import os
 import sys
+import click
 from moduleultra import *
 from gimme_input import *
 
+
+version = {}
+version_path = os.path.join(os.path.dirname(__file__), '../version.py')
+with open(version_path) as version_file:
+    exec(version_file.read(), version)
+
+
 @click.group()
+@click.version_option(version['__version__'])
 def main():
     pass
 
