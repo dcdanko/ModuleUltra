@@ -30,8 +30,8 @@ requirements = [
 
 
 dependency_links = [
-    'git+https://github.com/dcdanko/gimme_input.git#egg=gimme_input-1.0.0',
-    'git+https://github.com/dcdanko/PackageMega.git#egg=PackageMega-0.1.0',
+    'git+https://github.com/dcdanko/gimme_input.git@master#egg=gimme_input-1.0.0',
+    'git+https://github.com/dcdanko/PackageMega.git@master#egg=PackageMega-0.1.0',
 ]
 
 
