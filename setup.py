@@ -18,21 +18,20 @@ with open('README.rst') as readme_file:
 
 
 requirements = [
-    'click==6.7',
-    'snakemake==4.1.0',
-    'PyYAML==3.12.0',
+    'click~=6.7',
+    'snakemake~=4.1.0',
+    'PyYAML~=3.12.0',
     'blessings==1.7.0',
-    'yaml-backed-structs==0.9.0',
-    'datasuper==0.9.0',
-    'gimme_input==1.0.0',
-    'PackageMega==0.1.0',
+    'yaml-backed-structs~=0.9.0',
+    'datasuper~=0.10.0',
+    'gimme_input~=1.0.0',
+    'PackageMega~=0.1.0',
 ]
 
 
 dependency_links = [
     'git+https://github.com/dcdanko/gimme_input.git#egg=gimme_input-1.0.0',
     'git+https://github.com/dcdanko/PackageMega.git#egg=PackageMega-0.1.0',
-    'git+https://github.com/dcdanko/DataSuper.git@develop#egg=DataSuper-0.9.0',
 ]
 
 
