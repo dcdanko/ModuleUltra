@@ -61,7 +61,7 @@ setup(
                  'large biological datasets'),
     long_description=readme,
 
-    packages=find_packages(include=['moduleultra']),
+    packages=find_packages(exclude=['tests']),
     install_requires=requirements,
     dependency_links=dependency_links,
 
