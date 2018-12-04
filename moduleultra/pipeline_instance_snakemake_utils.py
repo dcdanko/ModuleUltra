@@ -1,5 +1,41 @@
 import sys
+from subprocess import call
 from .snakemake_rule_builder import SnakemakeRuleBuilder
+
+
+def snakemake_cli_api(snakefile,
+                      workdir=self.muRepo.getResultDir(),
+                      cluster=clusterScript,
+                      keepgoing=True,
+                      printshellcmds=True,
+                      dryrun=dryrun,
+                      printreason=reason,
+                      unlock=unlock,
+                      force_incomplete=True,
+                      latency_wait=100,
+                      jobname=snkmkJobnameTemplate,
+                      nodes=jobs,
+                      log_handler=loghandler):
+    cmd = (
+        f'cd {workdir}; '
+        'snakemake '
+        f'--snakefile {snakefile}'
+        '--keep-going '
+        '--printshellcmds '
+        '--rerun-incomplete '
+        f'--jobname {jobname} '
+        f'--jobs {jobs} '
+    )
+    if dryrun:
+        cmd += ' --dryrun '
+    if printreason:
+        cmd += ' --reason '
+    if unlock:
+        cmd += ' --unlock '
+    if cluster:
+        cmd += f' --latency-wait {latency_wait} '
+        cmd += f' --cluster {cluster} '
+    call(cmd)
 
 
 def initialImports():

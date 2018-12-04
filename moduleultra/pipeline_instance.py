@@ -117,6 +117,10 @@ class PipelineInstance:
             name = f'{getcwd()} :: {self.pipelineName} :: {self.pipelineVersion}'
             loghandler = CompactMultiProgressBars(name=name).handle_msg
 
+        cores = 1
+        if local:
+            cores = jobs
+
         snakemake(
             snakefile,
             config={},
@@ -131,7 +135,8 @@ class PipelineInstance:
             latency_wait=100,
             jobname=snkmkJobnameTemplate,
             nodes=jobs,
-            log_handler=loghandler
+            log_handler=loghandler,
+            cores=cores,
         )
 
     def getSnakemakeJobnameTemplate(self):
