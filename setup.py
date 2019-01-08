@@ -25,7 +25,7 @@ requirements = [
     'yaml-backed-structs~=1.0.0',
     'datasuper~=0.10.0',
     'gimme_input==1.0.0',
-    'PackageMega==0.1.0',
+    'PackageMega>=0.1.0',
 ]
 
 
