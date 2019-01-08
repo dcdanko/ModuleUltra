@@ -119,6 +119,8 @@ class ModuleUltraRepo:
         else:
             startPath = os.path.abspath(startDir)
         if ModuleUltraRepo.repoDirName in os.listdir(startPath):
+            print(startPath)
+            print(ModuleUltraRepo.repoDirName)
             repoPath = os.path.join(startPath, ModuleUltraRepo.repoDirName)
             return repoPath
         up = os.path.dirname(startPath)
