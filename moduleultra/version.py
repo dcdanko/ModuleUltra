@@ -1,5 +1,5 @@
 """Single source for package version."""
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 __author__ = 'David C Danko'
 __email__ = 'dcd3001@med.cornell.edu'

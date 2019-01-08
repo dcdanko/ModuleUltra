@@ -108,7 +108,7 @@ def reinstallPipeline(name, uri, version=None, dev=False):
 @click.option('--choose-exclude-endpts/--no-exclude-endpts', default=False)
 @click.option('--exclude-endpts', default='', type=str, help='list of comma-separated names')
 @click.option('--choose/--all', default=False)
-@click.option('--local/--cluster', default=False)
+@click.option('--local/--cluster', default=True)
 @click.option('--dryrun/--wetrun', default=False)
 @click.option('--unlock/--no-unlock', default=False)
 @click.option('--compact/--logger', default=False)
