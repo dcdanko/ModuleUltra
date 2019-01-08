@@ -114,13 +114,8 @@ class ModuleUltraRepo:
     @staticmethod
     def repoDir(startDir='.'):
         '''Return the abspath to the first repo at or above `startDir`.'''
-        if startDir == '.':
-            startPath = os.getenv('PWD')
-        else:
-            startPath = os.path.abspath(startDir)
+        startPath = os.path.abspath(startDir)
         if ModuleUltraRepo.repoDirName in os.listdir(startPath):
-            print(startPath)
-            print(ModuleUltraRepo.repoDirName)
             repoPath = os.path.join(startPath, ModuleUltraRepo.repoDirName)
             return repoPath
         up = os.path.dirname(startPath)
