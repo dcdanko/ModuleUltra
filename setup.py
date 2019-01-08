@@ -22,7 +22,7 @@ requirements = [
     'snakemake~=4.1.0',
     'PyYAML~=3.12.0',
     'blessings~=1.7.0',
-    'yaml-backed-structs~=0.9.0',
+    'yaml-backed-structs~=1.0.0',
     'datasuper~=0.10.0',
     'gimme_input==1.0.0',
     'PackageMega==0.1.0',
