@@ -8,6 +8,7 @@ from moduleultra.errors import PipelineAlreadyInstalledError
 import packagemega as pm
 from gimme_input import BoolUserInput
 
+
 class PipelineInstaller:
     '''
     Installs a pipeline

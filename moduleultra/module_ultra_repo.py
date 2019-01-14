@@ -1,4 +1,4 @@
-from yaml_backed_structs import *
+from yaml_backed_structs import PersistentDict
 from .utils import *
 from .errors import *
 import os.path

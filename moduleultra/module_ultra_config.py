@@ -1,4 +1,4 @@
-from yaml_backed_structs import *
+from yaml_backed_structs import PersistentDict
 import os.path
 import os
 from json import loads as jloads

@@ -2,7 +2,9 @@ from .utils import getOrDefault
 import datasuper as ds
 from .snakemake_rule_builder import SnakemakeRuleBuilder
 from .snakemake_utils import *
-from .utils import *
+from .utils import (
+    joinResultNameType,
+)
 
 
 class ResultSchema:
@@ -175,8 +177,7 @@ class ResultSchema:
         '''
         if self.level == 'SAMPLE':
             return self._makeSampleLevelRegisterRule()
-        elif self.level == 'GROUP':
-            return self._makeGroupLevelRegisterRule()
+        return self._makeGroupLevelRegisterRule()
 
     def preprocessSnakemake(self):
         '''
