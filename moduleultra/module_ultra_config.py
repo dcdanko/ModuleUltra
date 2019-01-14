@@ -1,7 +1,7 @@
 from yaml_backed_structs import PersistentDict
 import os.path
 import os
-from json import loads as jloads
+from yaml import loads as yloads
 from .errors import *
 from .installation import *
 from shutil import rmtree
@@ -49,7 +49,7 @@ class ModuleUltraConfig:
         pipeDef = os.path.join(self.getInstalledPipelinesDir(), pipeName)
         pipeDef = os.path.join(pipeDef, 'pipeline_definition.json')
         pipeDef = open(pipeDef).read()
-        pipeDef = jloads(pipeDef)
+        pipeDef = yloads(pipeDef)
         return pipeDef
 
     def setClusterSubmitScript(self, script):
