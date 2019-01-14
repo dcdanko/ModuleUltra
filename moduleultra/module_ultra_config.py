@@ -49,7 +49,7 @@ class ModuleUltraConfig:
         pipeDef = os.path.join(self.getInstalledPipelinesDir(), pipeName)
         for ext in ['yml', 'yaml', 'json']:
             pipeDef = os.path.join(pipeDef, 'pipeline_definition.' + ext)
-            if isfile(pipeDef):
+            if os.path.isfile(pipeDef):
                 break
         pipeDef = open(pipeDef).read()
         pipeDef = yload(pipeDef)
