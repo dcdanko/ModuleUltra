@@ -8,6 +8,10 @@ ModuleUltra
     :target: https://pypi.python.org/pypi/ModuleUltra
     :alt: Latest PyPI version
 
+.. image:: https://www.codefactor.io/repository/github/dcdanko/ModuleUltra/badge
+    :target: https://www.codefactor.io/repository/github/dcdanko/ModuleUltra
+    :alt: CodeFactor
+
 .. image:: https://img.shields.io/pypi/pyversions/ModuleUltra.svg
     :alt: PyPI - Python version
 
