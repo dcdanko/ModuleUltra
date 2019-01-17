@@ -127,7 +127,7 @@ class ModuleUltraConfig:
 
         pipeDir = self.getPipelineDir(pipeName, version)
         pipeDef = os.path.join(pipeDir, 'pipeline_definition.json')
-        pipeDef = jloads(open(pipeDef).read())
+        pipeDef = yload(open(pipeDef).read())
         try:
             snakeDir = pipeDef["SNAKEMAKE"]["DIR"]
             snakeDir = os.path.join(pipeDir, snakeDir)
@@ -152,7 +152,7 @@ class ModuleUltraConfig:
         vPipeName = joinPipelineNameVersion(pipeName, version)
         pipeDir = os.path.join(self.getInstalledPipelinesDir(), vPipeName)
         pipeDef = os.path.join(pipeDir, 'pipeline_definition.json')
-        pipeDef = jloads(open(pipeDef).read())
+        pipeDef = yload(open(pipeDef).read())
         try:
             snakeConf = pipeDef["SNAKEMAKE"]["CONF"]
             snakeConf = os.path.join(pipeDir, snakeConf)
