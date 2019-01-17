@@ -62,7 +62,10 @@ class PipelineInstaller:
         return os.path.join(dest)
 
     def provisionallyLoadPipeline(self, staged):
-        pipeDef = os.path.join(staged, 'pipeline_definition.json')
+        for ext in ['yml', 'yaml', 'json']:
+            pipeDef = os.path.join(pipeDef, 'pipeline_definition.' + ext)
+            if os.path.isfile(pipeDef):
+                break
         with open(pipeDef) as pD:
             pipeDef = pD.read()
         pipeDef = jloads(pipeDef)
