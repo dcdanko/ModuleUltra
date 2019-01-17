@@ -124,6 +124,7 @@ class ModuleUltraConfig:
             version (str): Pipeline version.
             fileName (str): The name of the snakefile.
         '''
+        pipeDir = self.getPipelineDir(pipeName, version)
         pipeDef = self.getPipelineDefinition(pipeName, version=version)
         try:
             snakeDir = pipeDef["SNAKEMAKE"]["DIR"]
@@ -145,7 +146,7 @@ class ModuleUltraConfig:
             pipeName (str): The name of the pipeline.
             version (str): Pipeline version.
         '''
-
+        pipeDir = self.getPipelineDir(pipeName, version)
         pipeDef = self.getPipelineDefinition(pipeName, version=version)
         try:
             snakeConf = pipeDef["SNAKEMAKE"]["CONF"]
