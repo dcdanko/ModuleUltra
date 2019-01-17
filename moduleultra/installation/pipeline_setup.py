@@ -2,7 +2,7 @@ import shutil
 from subprocess import call
 import os.path
 from os import symlink
-from json import loads as jloads
+from yaml import load as yload
 from moduleultra.utils import *
 from moduleultra.errors import PipelineAlreadyInstalledError
 import packagemega as pm
@@ -68,7 +68,7 @@ class PipelineInstaller:
                 break
         with open(pipeDef) as pD:
             pipeDef = pD.read()
-        pipeDef = jloads(pipeDef)
+        pipeDef = yload(pipeDef)
         return pipeDef
 
     def loadPipelineFilesIntoConfig(self, staged, pipeDef):
