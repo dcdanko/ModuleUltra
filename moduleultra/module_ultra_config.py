@@ -124,10 +124,7 @@ class ModuleUltraConfig:
             version (str): Pipeline version.
             fileName (str): The name of the snakefile.
         '''
-
-        pipeDir = self.getPipelineDir(pipeName, version)
-        pipeDef = os.path.join(pipeDir, 'pipeline_definition.json')
-        pipeDef = yload(open(pipeDef).read())
+        pipeDef = self.getPipelineDefinition(pipeName, version=version)
         try:
             snakeDir = pipeDef["SNAKEMAKE"]["DIR"]
             snakeDir = os.path.join(pipeDir, snakeDir)
@@ -149,10 +146,7 @@ class ModuleUltraConfig:
             version (str): Pipeline version.
         '''
 
-        vPipeName = joinPipelineNameVersion(pipeName, version)
-        pipeDir = os.path.join(self.getInstalledPipelinesDir(), vPipeName)
-        pipeDef = os.path.join(pipeDir, 'pipeline_definition.json')
-        pipeDef = yload(open(pipeDef).read())
+        pipeDef = self.getPipelineDefinition(pipeName, version=version)
         try:
             snakeConf = pipeDef["SNAKEMAKE"]["CONF"]
             snakeConf = os.path.join(pipeDir, snakeConf)
