@@ -46,9 +46,9 @@ class ModuleUltraConfig:
             version = getHighestVersion(self.installedPipes[pipelineName])
 
         pipeName = joinPipelineNameVersion(pipelineName, version)
-        pipeDef = os.path.join(self.getInstalledPipelinesDir(), pipeName)
+        pipeDefRoot = os.path.join(self.getInstalledPipelinesDir(), pipeName)
         for ext in ['yml', 'yaml', 'json']:
-            pipeDef = os.path.join(pipeDef, 'pipeline_definition.' + ext)
+            pipeDef = os.path.join(pipeDefRoot, 'pipeline_definition.' + ext)
             if os.path.isfile(pipeDef):
                 break
         pipeDef = open(pipeDef).read()
