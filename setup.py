@@ -59,7 +59,6 @@ setup(
 
     description=('Tools to make pipelines easier to run and distribute for '
                  'large biological datasets'),
-    long_description=readme,
 
     packages=find_packages(exclude=['tests']),
     install_requires=requirements,

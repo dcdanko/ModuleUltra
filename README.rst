@@ -4,24 +4,31 @@ ModuleUltra
 .. image:: https://img.shields.io/circleci/project/github/dcdanko/ModuleUltra/master.svg
     :alt: CircleCI master
 
+
 .. image:: https://img.shields.io/pypi/v/ModuleUltra.svg
     :target: https://pypi.python.org/pypi/ModuleUltra
     :alt: Latest PyPI version
+
 
 .. image:: https://www.codefactor.io/repository/github/dcdanko/ModuleUltra/badge
     :target: https://www.codefactor.io/repository/github/dcdanko/ModuleUltra
     :alt: CodeFactor
 
+
 .. image:: https://img.shields.io/pypi/pyversions/ModuleUltra.svg
     :alt: PyPI - Python version
+
 
 .. image:: https://img.shields.io/pypi/dm/ModuleUltra.svg
     :alt: PyPI - Downloads
 
+
 .. image:: https://img.shields.io/github/license/dcdanko/ModuleUltra.svg
     :alt: Github license
 
+
 Easy to use pipelines for large biological datasets.
+
 
 Goals
 -----
@@ -41,6 +48,7 @@ In summary:
  - ModuleUltra reduces the amount of boilerplate code necessary to make a pipeline
 
 ModuleUltra is intended to improve reproducibility, features are being added to improve file provenance.
+
 
 Installation
 ------------

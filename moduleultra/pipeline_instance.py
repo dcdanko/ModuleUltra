@@ -67,7 +67,8 @@ class PipelineInstance:
     def run(self,
             endpts=None, excludeEndpts=None, groups=None, samples=None,
             dryrun=False, reason=True, unlock=False, jobs=1, local=False,
-            custom_config_file=None, compact_logger=False, benchmark=False):
+            custom_config_file=None, compact_logger=False, benchmark=False,
+            logger=None):
         '''Run this pipeline.
 
         To do this:
@@ -99,6 +100,8 @@ class PipelineInstance:
             local (:obj:`bool`, optional): Run all jobs on the local machine.
                 Defaults to False.
         '''
+        if not logger:
+            logger = lambda s: print(s, file=sys.stderr)
         if benchmark:
             for schema in self.resultSchema:
                 schema.benchmark = True
@@ -112,6 +115,8 @@ class PipelineInstance:
             endpts,
             custom_config_file=custom_config_file
         )
+        endpt_names = ', '.join([endpt.name for endpt in endpts])
+        logger(f'Running Endpoints: {endpt_names}')
         snakefile = self.preprocessSnakemake(preprocessedConf,
                                              endpts,
                                              samples,
