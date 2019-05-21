@@ -227,6 +227,10 @@ class PipelineInstance:
 
         return confStr
 
+    def listOrigins(self):
+        '''Return a list of origin endpoints in this pipeline.'''
+        return self.flatOrigins
+
     def listFileTypes(self):
         '''Return a list of file types in this pipeline.'''
         return [el for el in self.fileTypes]

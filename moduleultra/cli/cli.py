@@ -5,6 +5,7 @@ import sys
 import click
 from moduleultra import *
 from gimme_input import *
+from yaml import dumps as ydumps
 
 
 version = {}
@@ -203,9 +204,17 @@ def detail():
 
 
 @detail.command(name='pipeline')
+@click.option('-v', '--version', default=None, type=str)
 @click.argument('name', nargs=1)
-def detailPipeline(name):
-    pass
+def detailPipeline(version, name):
+    repo = ModuleUltraRepo.loadRepo()
+    pipe = repo.getPipelineInstance(pipeline, version=version)
+
+    out = {
+        'origins': pipe.listOrigins(),
+        'endpoints': pipe.listEndpoints(),
+    }
+    click.echo(ydumps(out))
 
 
 if __name__ == '__main__':
