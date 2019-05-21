@@ -170,18 +170,27 @@ class PipelineInstance:
         in `endpts` but never return endpoints in `excludeEndpts`.
         '''
         if not endpts:
-            endpts = [schema
-                      for schema in self.resultSchema
-                      if schema.name in self.endpoints]
+            endpts = {schema for schema in self.resultSchema if schema.name in self.endpoints}
         else:
-            endpts = [schema
-                      for schema in self.resultSchema
-                      if schema.name in endpts]
+            endpts = {schema for schema in self.resultSchema if schema.name in endpts}
         if excludeEndpts:
-            endpts = [schema
-                      for schema in self.resultSchema
-                      if schema.name not in excludeEndpts]
-        return endpts
+            endpts = {schema for schema in endpts if schema.name not in excludeEndpts}
+
+        num_endpts = -1
+        while len(endpts) != num_endpts:
+            num_endpts = len(endpts)
+            endpt_names = {schema.name for schema in endpts}
+            new_endpts = set()
+            for schema in endpts:
+                all_in = True
+                for depends in schema.dependencies:
+                    if depends not in endpt_names:
+                        all_in = False
+                if all_in:
+                    new_endpts.add(schema)
+            endpts = new_endpts
+
+        return list(endpts)
 
     def preprocessSnakemake(self, confStr, endpts, samples, groups):
         '''Return the abspath to a master snakefile that can be run.'''
