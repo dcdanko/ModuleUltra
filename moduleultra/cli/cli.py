@@ -183,7 +183,7 @@ def viewPipelines(installed):
         '''
         muConfig = ModuleUltraConfig.load()
         for pName, versions in muConfig.listInstalledPipelines().items():
-            vs = ' '.join(versions)
+            vs = ' '.join([str(el) for el in versions])
             print('{} :: {}'.format(pName, vs))
     else:
         msg = '''

@@ -200,10 +200,10 @@ class ResultSchema:
 
     def _makeFilePattern(self, fname, ext):
         if self.level == 'SAMPLE':
-            fpat = '{{sample_name}}/{{sample_name}}.{}.{}.{}'.format(self.module, fname, ext)
+            return '{{sample_name}}/{{sample_name}}.{}.{}.{}'.format(self.module, fname, ext)
         elif self.level == 'GROUP':
-            fpat = '{{group_name}}/{{group_name}}.{}.{}.{}'.format(self.module, fname, ext)
-        return fpat
+            return '{{group_name}}/{{group_name}}.{}.{}.{}'.format(self.module, fname, ext)
+        assert False, f'Bad level for {self.name} {fname}'
 
     def addBenchmark(self, snakefileStr):
         """Hack."""
@@ -234,7 +234,11 @@ class ResultSchema:
     def preprocessConf(self, conf):
         dsRepo = ds.Repo.loadRepo()
         for fname, ftype in self.files.items():
-            ext = dsRepo.getFileTypeExt(ftype)
+            try:
+                ext = dsRepo.getFileTypeExt(ftype)
+            except ds.errors.TypeNotFoundError:
+                print(f'Cannot find filetype {ftype} for {self.name}')
+                raise
             if self.isOrigin():
                 fpattern = ""
             else:
