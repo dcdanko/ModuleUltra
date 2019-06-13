@@ -81,7 +81,7 @@ def preprocessSamplesAndGroups(origins, samples, groups):
     for group in groups:
         keep = True
         for sample in group.allSamples():
-            if sample not in sampleSet:
+            if sample.name not in sampleSet:
                 keep = False
         if keep:
             filteredGroups.append(group)

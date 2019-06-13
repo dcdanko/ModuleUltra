@@ -79,7 +79,7 @@ class ResultSchema:
                 print('[DataSuper] Saving Result: {}'.format(result), file=sys.stderr)
                 try:
                     result.save()
-                except ds.database.RecordExistsError as ree:
+                except RecordExistsError as ree:
                     print('[DataSuper] Result Record already exists: {}'.format(ree), file=sys.stderr)
 
                 try:
@@ -128,7 +128,7 @@ class ResultSchema:
                     print('[DataSuper] Saving File: {}'.format(fileRec), file=sys.stderr)
                     try:
                         fileRec.save()
-                    except ds.database.RecordExistsError as ree:
+                    except RecordExistsError as ree:
                         print('[DataSuper] Record already exists: {}'.format(ree), file=sys.stderr)
                     fileRecs[fname] = name
 
@@ -139,7 +139,7 @@ class ResultSchema:
                 print('[DataSuper] Saving Result: {}'.format(result), file=sys.stderr)
                 try:
                     result.save()
-                except ds.database.RecordExistsError as ree:
+                except RecordExistsError as ree:
                     print('[DataSuper] Record already exists: {}'.format(ree), file=sys.stderr)
 
                 try:

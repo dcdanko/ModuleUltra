@@ -7,6 +7,7 @@ def initialImports():
     # add imports
     preprocessed += 'import os.path\n'
     preprocessed += 'import datasuper as ds\n'
+    preprocessed += 'from datasuper.database import RecordExistsError\n'
     preprocessed += 'from moduleultra.snakemake_utils import *\n'
     preprocessed += '\nglobal_master_datasuper_repo = ds.Repo.loadRepo()\n'
     return preprocessed

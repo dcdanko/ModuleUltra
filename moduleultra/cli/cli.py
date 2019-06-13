@@ -105,6 +105,7 @@ def reinstallPipeline(name, uri, version=None, dev=False):
 @click.option('-p', '--pipeline', default=None, type=str)
 @click.option('-v', '--version', default=None, type=str)
 @click.option('-c', '--local-config', default=None, type=str)
+@click.option('--sample-list', default=None, type=click.File('r'))
 @click.option('--choose-endpts/--all-endpts', default=False)
 @click.option('--choose-exclude-endpts/--no-exclude-endpts', default=False)
 @click.option('--exclude-endpts', default='', type=str, help='list of comma-separated names')
@@ -115,7 +116,7 @@ def reinstallPipeline(name, uri, version=None, dev=False):
 @click.option('--compact/--logger', default=False)
 @click.option('--benchmark/--no-benchmark', default=False)
 @click.option('-j', '--jobs', default=1)
-def runPipe(pipeline, version, local_config,
+def runPipe(pipeline, version, local_config, sample_list,
             choose_endpts, choose_exclude_endpts, exclude_endpts, choose,
             local, dryrun, unlock, compact, benchmark, jobs):
     repo = ModuleUltraRepo.loadRepo()
@@ -143,7 +144,12 @@ def runPipe(pipeline, version, local_config,
         groups = UserMultiChoice('What sample groups should be processed?',
                                  dsRepo.db.sampleGroupTable.getAll(),
                                  display=lambda x: x.name).resolve()
-    samples = None
+    if sample_list:
+        samples = [line.strip() for line in sample_list if line.strip()]
+        all_samples = {sample.name for sample in dsRepo.db.sampleTable.getAll()}
+        samples = [sample for sample in samples if sample in all_samples]
+    else:
+        samples = None
     inp = BoolUserInput('Process data from a specific samples?', False)
     if choose and inp.resolve():
         if groups is not None:
