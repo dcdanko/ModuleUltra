@@ -4,8 +4,9 @@ from random import choice
 from .config import DaemonConfig
 
 
-def repo_status(daemon_config=DaemonConfig.load_from_yaml()):
+def repo_status(daemon_config=None):
     """Return a dict of repo_config -> [((pipeline_name, version), number_outstanding_jobs)]."""
+    daemon_config = daemon_config if daemon_config else DaemonConfig.load_from_yaml()
     status = {}
     for repo_config in daemon_config.list_repos():
         try:
@@ -58,11 +59,12 @@ def _status_one_repo(daemon_config, repo_config):
     return status
 
 
-def repo_run(daemon_config=DaemonConfig.load_from_yaml()):
+def repo_run(daemon_config=None):
     """Run unfished pipelines in the repo.
 
     Only run one pipeline per repo at a time.
     """
+    daemon_config = daemon_config if daemon_config else DaemonConfig.load_from_yaml()
     jobs_per_repo = daemon_config.total_jobs / len(daemon_config.repos)
     for repo_config, pipelines in repo_status(daemon_config=daemon_config):
         try:

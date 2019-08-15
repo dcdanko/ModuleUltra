@@ -10,7 +10,7 @@ def daemon():
     pass
 
 
-@daemon.status()
+@daemon.command('status')
 def cli_daemon_status():
     """Print the status of all repos in the config."""
     for repo_config, pipelines in repo_status():
@@ -19,7 +19,7 @@ def cli_daemon_status():
             print(f'{header} {joinPipelineNameVersion(pipe_name, version)} {num_jobs}')
 
 
-@daemon.run()
+@daemon.command('run')
 def cli_daemon_run():
     """Run unfinished pipelines in the config."""
     repo_run()

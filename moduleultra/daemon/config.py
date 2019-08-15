@@ -1,5 +1,5 @@
 
-from yaml import loads
+from yaml import load
 from os import environ
 from os.path import join, isfile
 
@@ -52,8 +52,8 @@ class DaemonConfig:
         """Return a filepath for the config to be used or None."""
         return None
 
-    @staticmethod
-    def get_daemon_config_filename(self):
+    @classmethod
+    def get_daemon_config_filename(ctype):
         try:
             return environ['MODULE_ULTRA_DAEMON_CONFIG']
         except KeyError:
@@ -63,9 +63,10 @@ class DaemonConfig:
                 return config_filename
         assert False, "No daemon config found"
 
-    @staticmethod
-    def load_from_yaml(self, yaml_filename=get_daemon_config_filename()):
-        raw_config = loads(open(yaml_filename))
+    @classmethod
+    def load_from_yaml(ctype, yaml_filename=None):
+        yaml_filename = yaml_filename if yaml_filename else ctype.get_daemon_config_filename()
+        raw_config = load(open(yaml_filename))
         raw_repos = raw_config['repos']
         repo_list = [
             (raw_repo['name'], raw_repo['path'], raw_repo['pipelines'])
