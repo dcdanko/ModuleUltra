@@ -13,7 +13,7 @@ def daemon():
 @daemon.command('status')
 def cli_daemon_status():
     """Print the status of all repos in the config."""
-    for repo_config, pipelines in repo_status():
+    for repo_config, pipelines in repo_status().items():
         header = f'{repo_config.repo_name} {repo_config.repo_path}'
         for (pipe_name, version), num_jobs in pipelines:
             print(f'{header} {joinPipelineNameVersion(pipe_name, version)} {num_jobs}')

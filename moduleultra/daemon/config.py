@@ -17,11 +17,11 @@ class RepoDaemonConfig:
 
     def get_repo(self):
         """Return the MU repo that this represents."""
-        return ModuleUltraRepo.loadRepo(startDir=self.repo_path)
+        return ModuleUltraRepo(self.repo_path)
 
     def get_pipeline_list(self):
         """Return a list of (pipe_name, version)."""
-        pass
+        return [(pipe['name'], pipe['version']) for pipe in self.pipelines]
 
     def get_pipeline_endpts(self, pipe_name):
         """Return a list of endpts or None."""
@@ -45,7 +45,11 @@ class DaemonConfig:
         """Return a list of RepoDaemonConfigs."""
         repo_configs = []
         for repo_name, repo_path, pipelines in self.repos:
-            repo_configs.append(RepoDaemonConfig(repo_name, repo_path, pipelines))
+            repo_configs.append(RepoDaemonConfig(**{
+                'repo_name': repo_name,
+                'repo_path': repo_path,
+                'pipelines': pipelines,}
+            ))
         return repo_configs
 
     def get_pipeline_run_config(self, pipe_name, pipe_version):
@@ -58,7 +62,7 @@ class DaemonConfig:
             return environ['MODULE_ULTRA_DAEMON_CONFIG']
         except KeyError:
             config_dir = ModuleUltraConfig.getConfigDir()
-            config_filename = join(config_dir, 'damon_config.yaml')
+            config_filename = join(config_dir, 'daemon_config.yaml')
             if isfile(config_filename):
                 return config_filename
         assert False, "No daemon config found"

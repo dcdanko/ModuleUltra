@@ -22,7 +22,7 @@ class ModuleUltraRepo:
         self.pipelines = PersistentDict(pipePath)
 
     def datasuperRepo(self):
-        return ds.Repo.loadRepo()
+        return ds.Repo(self.abspath)
 
     def addPipeline(self, pipelineName, version=None, modify=False):
         '''Add an installed pipeline to this repo.
@@ -54,7 +54,7 @@ class ModuleUltraRepo:
     def addPipelineTypes(self, pipelineName, version, pipelineDef, modify=False):
         '''Add file, result, and sample types from a pipeline.'''
         instance = PipelineInstance(self, pipelineName, version, pipelineDef)
-        with ds.Repo.loadRepo() as dsRepo:
+        with ds.Repo(self.abspath) as dsRepo:
             for fileTypeName in instance.listFileTypes():
                 dsRepo.addFileType(fileTypeName)
 

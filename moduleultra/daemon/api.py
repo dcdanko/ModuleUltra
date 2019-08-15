@@ -1,5 +1,8 @@
 
+import sys
+
 from random import choice
+from os import chdir, getcwd, devnull
 
 from .config import DaemonConfig
 
@@ -8,13 +11,17 @@ def repo_status(daemon_config=None):
     """Return a dict of repo_config -> [((pipeline_name, version), number_outstanding_jobs)]."""
     daemon_config = daemon_config if daemon_config else DaemonConfig.load_from_yaml()
     status = {}
+    original_dir = getcwd()
     for repo_config in daemon_config.list_repos():
         try:
+            chdir(repo_config.repo_path)
             status_of_repo = _status_one_repo(daemon_config, repo_config)
             status[repo_config] = list(status_of_repo.items())
         except Exception:
-            continue
-    return status_of_repo
+            raise
+        finally:
+            chdir(original_dir)
+    return status
 
 
 class _SnakemakeInfoGrabber:
@@ -34,30 +41,42 @@ class _SnakemakeInfoGrabber:
         ]
         self.num_outstanding_jobs = 0
         for rulename, count in job_list:
+            if rulename == 'all':
+                continue
             self.num_outstanding_jobs += count
 
 
+
 def _status_one_repo(daemon_config, repo_config):
-    repo = repo_config.get_repo()
     status = {}
     for pipe_name, pipe_version in repo_config.get_pipeline_list():
         try:
-            pipe = repo.getPipelineInstance(pipe_name)
-        except AssertionError:
-            repo.addPipeline(pipe_name, version=pipe_version)
-            pipe = repo.getPipelineInstance(pipe_name)
-        assert pipe.pipelineVersion == pipe_version
-        pipe.run(
-            endpts=repo_config.get_pipeline_endpts(pipe_name),
-            excludeEndpts=repo_config.get_pipeline_excluded_endpts(pipe_name),
-            local=daemon_config.run_local,
-            custom_config_file=daemon_config.get_pipeline_run_config(pipe_name, pipe_version),
-            dryrun=True,
-            loghandler=_SnakemakeInfoGrabber
-        )
-        status[(pipe_name, pipe_version)] = _SnakemakeInfoGrabber.num_outstanding_jobs
+            status[(pipe_name, pipe_version)] = _status_one_repo_one_pipeline(daemon_config, repo_config, pipe_name, pipe_version)
+        except Exception:
+            raise
+            status[(pipe_name, pipe_version)] = -1000
     return status
 
+
+def _status_one_repo_one_pipeline(daemon_config, repo_config, pipe_name, pipe_version):
+    repo = repo_config.get_repo()
+    try:
+        pipe = repo.getPipelineInstance(pipe_name)
+    except AssertionError:
+        repo.addPipeline(pipe_name, version=pipe_version)
+        pipe = repo.getPipelineInstance(pipe_name)
+    assert pipe.pipelineVersion == pipe_version
+    count = _SnakemakeInfoGrabber()
+    pipe.run(
+        endpts=repo_config.get_pipeline_endpts(pipe_name),
+        excludeEndpts=repo_config.get_pipeline_excluded_endpts(pipe_name),
+        local=daemon_config.run_local,
+        custom_config_file=daemon_config.get_pipeline_run_config(pipe_name, pipe_version),
+        dryrun=True,
+        logger=lambda x: x,
+        loghandler=count.handle_msg
+    )
+    return count.num_outstanding_jobs
 
 def repo_run(daemon_config=None):
     """Run unfished pipelines in the repo.
