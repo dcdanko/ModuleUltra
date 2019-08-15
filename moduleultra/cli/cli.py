@@ -7,6 +7,8 @@ from moduleultra import *
 from gimme_input import *
 from yaml import dump as ydump
 
+from .daemon import daemon
+
 
 version = {}
 version_path = os.path.join(os.path.dirname(__file__), '../version.py')
@@ -18,6 +20,9 @@ with open(version_path) as version_file:
 @click.version_option(version['__version__'])
 def main():
     pass
+
+
+main.add_command(daemon)
 
 
 @main.command()
