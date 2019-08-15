@@ -68,7 +68,7 @@ class PipelineInstance:
             endpts=None, excludeEndpts=None, groups=None, samples=None,
             dryrun=False, reason=True, unlock=False, jobs=1, local=False,
             custom_config_file=None, compact_logger=False, benchmark=False,
-            logger=None):
+            logger=None, loghandler=None):
         '''Run this pipeline.
 
         To do this:
@@ -124,8 +124,7 @@ class PipelineInstance:
         clusterScript = self.getClusterSubmitScript(local)
         snkmkJobnameTemplate = self.getSnakemakeJobnameTemplate()
 
-        loghandler = None
-        if compact_logger:
+        if not loghandler and compact_logger:
             name = f'{getcwd()} :: {self.pipelineName} :: {self.pipelineVersion}'
             loghandler = CompactMultiProgressBars(name=name).handle_msg
 
