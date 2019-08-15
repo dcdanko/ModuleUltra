@@ -1,22 +1,31 @@
 
 from random import choice
 from os import chdir, getcwd
+from multiprocessing import Pool, TimeoutError
 
 from .config import DaemonConfig
 
 
-def repo_status(daemon_config=None):
+def repo_status(daemon_config=None, timeout=3600):
     """Return a dict of repo_config -> [((pipeline_name, version), number_outstanding_jobs)]."""
     daemon_config = daemon_config if daemon_config else DaemonConfig.load_from_yaml()
     original_dir = getcwd()
-    for repo_config in daemon_config.list_repos():
+    pool = Pool(daemon_config.total_jobs)
+
+    def handle_one_repo(repo_config):
         try:
             chdir(repo_config.repo_path)
-            yield repo_config, _status_one_repo(daemon_config, repo_config)
+            return repo_config, list(_status_one_repo(daemon_config, repo_config))
         except Exception:
             raise
         finally:
             chdir(original_dir)
+
+    for result in pool.apply_async(handle_one_repo, daemon_config.list_repos()):
+        try:
+            yield result.get(timeout)
+        except TimeoutError:
+            pass
 
 
 class _SnakemakeInfoGrabber:
