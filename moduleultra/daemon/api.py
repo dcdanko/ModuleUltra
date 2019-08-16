@@ -11,21 +11,24 @@ def repo_status(daemon_config=None, timeout=3600):
     daemon_config = daemon_config if daemon_config else DaemonConfig.load_from_yaml()
     original_dir = getcwd()
     pool = Pool(daemon_config.total_jobs)
-
-    def handle_one_repo(repo_config):
-        try:
-            chdir(repo_config.repo_path)
-            return repo_config, list(_status_one_repo(daemon_config, repo_config))
-        except Exception:
-            raise
-        finally:
-            chdir(original_dir)
-
-    for result in pool.apply_async(handle_one_repo, daemon_config.list_repos()):
+    async_results = [
+        pool.apply_async(handle_one_repo, (repo_config, daemon_config, original_dir))
+        for repo_config in daemon_config.list_repos()
+    ]
+    for result in async_results:
         try:
             yield result.get(timeout)
         except TimeoutError:
             pass
+
+def handle_one_repo(repo_config, daemon_config, original_dir):
+    try:
+        chdir(repo_config.repo_path)
+        return repo_config, list(_status_one_repo(daemon_config, repo_config))
+    except Exception:
+        pass
+    finally:
+        chdir(original_dir)
 
 
 class _SnakemakeInfoGrabber:
