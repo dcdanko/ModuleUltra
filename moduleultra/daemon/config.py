@@ -23,6 +23,12 @@ class RepoDaemonConfig:
         """Return a list of (pipe_name, version)."""
         return [(pipe['name'], pipe['version']) for pipe in self.pipelines]
 
+    def get_pipeline_tolerance(self, pipe_name):
+        """Return tolerance for the pipeline."""
+        for pipe in self.pipelines:
+            if pipe['name'] == pipe_name:
+                return pipe.get('tolerance', 0)
+
     def get_pipeline_endpts(self, pipe_name):
         """Return a list of endpts or None."""
         return None
@@ -48,8 +54,8 @@ class DaemonConfig:
             repo_configs.append(RepoDaemonConfig(**{
                 'repo_name': repo_name,
                 'repo_path': repo_path,
-                'pipelines': pipelines,}
-            ))
+                'pipelines': pipelines,
+            }))
         return repo_configs
 
     def get_pipeline_run_config(self, pipe_name, pipe_version):

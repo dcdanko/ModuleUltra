@@ -21,6 +21,7 @@ def repo_status(daemon_config=None, timeout=3600):
         except TimeoutError:
             pass
 
+
 def handle_one_repo(repo_config, daemon_config, original_dir):
     try:
         chdir(repo_config.repo_path)
@@ -100,7 +101,9 @@ def repo_run(daemon_config=None):
 
 
 def _run_one_repo(daemon_config, repo_config, pipelines, njobs):
-    (pipe_name, pipe_version), _ = choice([p for p in pipelines if p[1] > 0])
+    (pipe_name, pipe_version), _ = choice([
+        p for p in pipelines if p[1] > repo_config.get_pipeline_tolerance(p[0][0])
+    ])
     repo = repo_config.get_repo()
     try:
         pipe = repo.getPipelineInstance(pipe_name)
