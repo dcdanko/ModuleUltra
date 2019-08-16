@@ -1,7 +1,10 @@
 """CLI commands for various daemon utils."""
 
 import click
-from ..daemon import repo_status, repo_run
+
+from time import gmtime, strftime
+
+from moduleultra.daemon import repo_status, repo_run
 from moduleultra.utils import joinPipelineNameVersion
 
 
@@ -16,7 +19,9 @@ def cli_daemon_status():
     for repo_config, pipelines in repo_status():
         header = f'{repo_config.repo_name} {repo_config.repo_path}'
         for (pipe_name, version), num_jobs in pipelines:
-            print(f'{header} {joinPipelineNameVersion(pipe_name, version)} {num_jobs}')
+            timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+            pipe = joinPipelineNameVersion(pipe_name, version)
+            print(f'[{timestamp}] {header} {pipe} {num_jobs}')
 
 
 @daemon.command('run')
